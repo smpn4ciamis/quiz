@@ -1,1 +1,2126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏆 ARENA KUIS REBUTAN — 5 KELOMPOK</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka & Nunito untuk kesan Game Show Edukasi SD yang tegas & ramah -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --font-display: 'Fredoka', sans-serif;
+            --font-body: 'Nunito', sans-serif;
+        }
+        
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
 
+        body {
+            font-family: var(--font-body);
+            background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
+            color: #ffffff;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            touch-action: manipulation;
+        }
+
+        h1, h2, h3, .font-game {
+            font-family: var(--font-display);
+            letter-spacing: 0.02em;
+        }
+
+        /* Tombol 3D khusus Layar Sentuh PID */
+        .btn-touch {
+            transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+            position: relative;
+            touch-action: manipulation;
+        }
+        .btn-touch:active:not(:disabled) {
+            transform: translateY(4px);
+        }
+        .btn-touch:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+
+        /* Gaya Tombol Pilihan Jawaban A B C D di Panel Kelompok */
+        .ans-btn {
+            box-shadow: 0 5px 0 rgba(0,0,0,0.35);
+            transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ans-btn:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.35);
+        }
+
+        /* Animasi Kustom */
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-LockGlow {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .modal-pop {
+            animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Custom Scrollbar untuk Modal jika diperlukan */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.7);
+            border-radius: 8px;
+        }
+
+        /* Print Style untuk Cetak Hasil */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                overflow: visible !important;
+                height: auto !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            #print-area {
+                display: block !important;
+                position: static !important;
+                background: white !important;
+                color: black !important;
+                padding: 20px !important;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between select-none">
+
+    <!-- KANVAS KONFETI UNTUK HASIL AKHIR -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 hidden"></canvas>
+
+    <!-- ======================================================================= -->
+    <!-- 1. HALAMAN PEMBUKA (HOME SCREEN)                                        -->
+    <!-- ======================================================================= -->
+    <section id="screen-home" class="fixed inset-0 z-40 flex flex-col items-center justify-between p-6 bg-gradient-to-b from-indigo-950 via-slate-900 to-slate-950">
+        <!-- Top Utility Bar -->
+        <div class="w-full flex justify-between items-center px-4">
+            <div class="flex items-center gap-3 bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-2xl">
+                <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="text-sm font-bold text-slate-300 tracking-wide">MODE LAYAR SENTUH PID INTERAKTIF (16:9) • SD KELAS 6</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSound()" id="btn-sound-home" class="btn-touch bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-600 px-4 py-2.5 rounded-2xl font-bold flex items-center gap-2 text-base shadow-lg">
+                    <i class="fas fa-volume-up text-lg"></i> <span>Suara: ON</span>
+                </button>
+                <button onclick="toggleFullScreen()" class="btn-touch bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-400 px-5 py-2.5 rounded-2xl font-bold flex items-center gap-2 text-base shadow-lg">
+                    <i class="fas fa-expand text-lg"></i> <span>Layar Penuh</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Hero Title & Preview 5 Kelompok -->
+        <div class="flex flex-col items-center text-center max-w-5xl my-auto">
+            <div class="inline-flex items-center gap-3 bg-amber-500/20 border-2 border-amber-400/60 text-amber-300 px-6 py-2 rounded-full font-extrabold text-lg mb-4 shadow-lg">
+                <i class="fas fa-trophy text-amber-400 text-xl"></i> PENDIDIKAN PANCASILA — NORMA & KESEPAKATAN KELAS
+            </div>
+            
+            <h1 class="font-game text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 drop-shadow-[0_5px_5px_rgba(0,0,0,0.6)] tracking-tight mb-3">
+                🏆 ARENA KUIS REBUTAN
+            </h1>
+            <div class="font-game text-3xl md:text-4xl text-white bg-indigo-600/90 border-2 border-indigo-300 px-8 py-2 rounded-2xl shadow-xl mb-8">
+                EDISI 5 KELOMPOK — LAYAR SENTUH BERSAMA
+            </div>
+
+            <!-- Preview 5 Kelompok Badges -->
+            <div id="home-team-badges" class="grid grid-cols-5 gap-4 w-full max-w-4xl mb-10 px-2">
+                <!-- Diisi via JS -->
+            </div>
+
+            <!-- Tombol Utama Halaman Pembuka -->
+            <div class="flex flex-wrap items-center justify-center gap-6">
+                <button onclick="startGame()" class="btn-touch bg-gradient-to-b from-emerald-400 to-emerald-600 hover:from-emerald-300 hover:to-emerald-500 text-slate-950 font-game text-3xl px-12 py-5 rounded-3xl shadow-[0_8px_0_#065f46] border-2 border-emerald-200 flex items-center gap-4">
+                    <i class="fas fa-play-circle text-4xl"></i> MULAI GAME
+                </button>
+                <button onclick="openModal('modal-settings')" class="btn-touch bg-gradient-to-b from-amber-400 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-game text-2xl px-8 py-5 rounded-3xl shadow-[0_8px_0_#92400e] border-2 border-amber-200 flex items-center gap-3">
+                    <i class="fas fa-users-cog text-3xl"></i> PENGATURAN KELOMPOK
+                </button>
+                <button onclick="openModal('modal-instructions')" class="btn-touch bg-gradient-to-b from-sky-400 to-sky-600 hover:from-sky-300 hover:to-sky-500 text-slate-950 font-game text-2xl px-8 py-5 rounded-3xl shadow-[0_8px_0_#075985] border-2 border-sky-200 flex items-center gap-3">
+                    <i class="fas fa-book-open text-3xl"></i> PETUNJUK
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="w-full text-center text-slate-400 text-sm font-semibold">
+            Sentuh langsung pilihan jawaban A, B, C, atau D pada panel kelompok masing-masing • Mendukung Multi-Sentuh Simultan
+        </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- 2. LAYAR UTAMA PERMAINAN (GAME ARENA 16:9)                              -->
+    <!-- ======================================================================= -->
+    <main id="screen-game" class="hidden w-screen h-screen flex flex-col justify-between p-2.5 gap-2 overflow-hidden no-print">
+        
+        <!-- ==================== BAGIAN ATAS: INFO SOAL, KONTROL GURU & SKOR RINGKAS ==================== -->
+        <header class="w-full bg-slate-900/95 border-2 border-slate-700/80 rounded-2xl px-3.5 py-2 flex items-center justify-between gap-3 shadow-xl shrink-0">
+            
+            <!-- Kiri: Nomor Soal, Status & Indikator Progres -->
+            <div class="flex items-center gap-3 shrink-0">
+                <button onclick="goHomeScreen()" title="Kembali ke Beranda" class="btn-touch bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 w-11 h-11 rounded-xl flex items-center justify-center text-lg shadow">
+                    <i class="fas fa-home"></i>
+                </button>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span id="question-counter" class="font-game text-xl text-amber-400 tracking-wide">SOAL 1 / 10</span>
+                        <span id="question-state-badge" class="px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                            BABAK MENJAWAB
+                        </span>
+                    </div>
+                    <!-- Indikator Progres 10 Soal -->
+                    <div id="progress-dots" class="flex items-center gap-1.5 mt-1">
+                        <!-- Dots diisi via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tengah: Papan Skor Ringkas 5 Kelompok -->
+            <div id="top-mini-scoreboard" class="flex items-center gap-2 overflow-x-auto py-0.5">
+                <!-- Diisi via JS -->
+            </div>
+
+            <!-- Kanan: Timer & Kontrol Utama Guru (Aman di Bagian Atas) -->
+            <div class="flex items-center gap-2 shrink-0">
+                <!-- Kotak Timer -->
+                <div id="timer-box" class="flex items-center gap-2 bg-slate-950 border-2 border-slate-700 px-3 py-1.5 rounded-xl">
+                    <i class="fas fa-stopwatch text-amber-400 text-lg"></i>
+                    <span id="timer-display" class="font-game text-2xl text-white w-10 text-center">20s</span>
+                </div>
+
+                <!-- Tombol Tambah Waktu -->
+                <button id="btn-add-time" onclick="teacherAddTime(15)" class="btn-touch bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs px-3 py-2.5 rounded-xl border border-sky-400 shadow flex items-center gap-1.5" title="Tambah Waktu +15 Detik">
+                    <i class="fas fa-plus-circle"></i> +15d
+                </button>
+
+                <!-- Tombol Reset Babak -->
+                <button id="btn-reset-round" onclick="teacherResetRound()" class="btn-touch bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs px-3 py-2.5 rounded-xl border border-amber-400 shadow flex items-center gap-1.5" title="Hapus Jawaban Babak Ini Saja">
+                    <i class="fas fa-rotate-left"></i> Reset Babak
+                </button>
+
+                <!-- Tombol Utama Guru: KUNCI JAWABAN & TAMPILKAN HASIL -->
+                <button id="btn-evaluate" onclick="teacherTriggerEvaluate()" class="btn-touch bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-game text-sm px-4 py-2.5 rounded-xl border-2 border-emerald-200 shadow-lg flex items-center gap-2">
+                    <i class="fas fa-check-double text-base"></i> KUNCI & TAMPILKAN HASIL
+                </button>
+
+                <!-- Tombol Soal Berikutnya (Muncul/Aktif saat soal selesai) -->
+                <button id="btn-next-question" onclick="teacherNextQuestion()" class="hidden btn-touch bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-game text-sm px-4 py-2.5 rounded-xl border-2 border-yellow-100 shadow-lg flex items-center gap-2 animate-bounce">
+                    <span>SOAL BERIKUTNYA</span> <i class="fas fa-arrow-right text-base"></i>
+                </button>
+
+                <!-- Menu Kontrol Guru Lainnya -->
+                <button onclick="openModal('modal-scoreboard')" class="btn-touch bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-xs px-3 py-2.5 rounded-xl border border-indigo-400 shadow flex items-center gap-1.5" title="Lihat Papan Skor Lengkap">
+                    <i class="fas fa-ranking-star text-sm"></i> Skor
+                </button>
+
+                <button onclick="teacherSkipQuestion()" id="btn-skip-question" class="btn-touch bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-3 py-2.5 rounded-xl border border-slate-600 shadow flex items-center gap-1" title="Lewati Soal">
+                    <i class="fas fa-forward-step"></i> Lewati
+                </button>
+
+                <button onclick="openModal('modal-confirm-reset')" class="btn-touch bg-rose-900/80 hover:bg-rose-700 text-rose-200 font-bold text-xs px-3 py-2.5 rounded-xl border border-rose-500/50 shadow" title="Reset Seluruh Permainan">
+                    <i class="fas fa-trash-can"></i>
+                </button>
+
+                <button onclick="toggleFullScreen()" class="btn-touch bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-3 py-2.5 rounded-xl border border-slate-600 shadow" title="Layar Penuh">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- ==================== BAGIAN TENGAH: PANEL PERTANYAAN & OPSI BACAAN ==================== -->
+        <section class="w-full flex-1 min-h-0 flex flex-col justify-between bg-gradient-to-b from-slate-900/95 to-indigo-950/90 border-2 border-indigo-500/40 rounded-3xl p-4 shadow-2xl relative overflow-hidden">
+            
+            <!-- Banner Status / Umpan Balik Babak (Muncul saat Hasil / Coba Lagi / Waktu Habis) -->
+            <div id="round-feedback-banner" class="hidden w-full mb-2 px-4 py-2 rounded-2xl border-2 flex items-center justify-between gap-4 shadow-lg shrink-0 z-10">
+                <div class="flex items-center gap-3">
+                    <i id="feedback-icon" class="fas fa-info-circle text-2xl"></i>
+                    <div>
+                        <div id="feedback-title" class="font-game text-lg leading-tight">STATUS BABAK</div>
+                        <div id="feedback-subtitle" class="text-xs font-bold opacity-90">Detail status babak saat ini.</div>
+                    </div>
+                </div>
+                <div id="feedback-actions" class="flex items-center gap-2 shrink-0">
+                    <!-- Tombol Kontekstual: Coba Lagi / Tampilkan Pembahasan / Soal Berikutnya -->
+                </div>
+            </div>
+
+            <!-- Teks Pertanyaan Utama -->
+            <div class="my-auto flex flex-col justify-center items-center text-center px-4">
+                <p id="question-text" class="font-extrabold text-2xl lg:text-3xl xl:text-4xl text-white leading-snug tracking-normal drop-shadow max-w-6xl">
+                    Memuat pertanyaan...
+                </p>
+            </div>
+
+            <!-- 4 Kartu Pilihan Jawaban untuk Dibaca Seluruh Kelas -->
+            <div id="question-options-board" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-2 shrink-0">
+                <!-- Kartu A, B, C, D diisi via JS -->
+            </div>
+
+            <!-- Kotak Pembahasan Singkat (Overlay di bagian bawah kartu soal jika diaktifkan) -->
+            <div id="explanation-panel" class="hidden mt-2 bg-emerald-950/95 border-2 border-emerald-400 text-emerald-100 px-4 py-2.5 rounded-2xl flex items-center justify-between gap-4 shadow-xl shrink-0">
+                <div class="flex items-center gap-3 text-sm md:text-base">
+                    <span class="bg-emerald-400 text-slate-950 font-game px-3 py-1 rounded-xl text-xs uppercase shrink-0">
+                        <i class="fas fa-lightbulb mr-1"></i> Pembahasan
+                    </span>
+                    <p id="explanation-text" class="font-bold text-white"></p>
+                </div>
+                <button onclick="toggleExplanation(false)" class="text-emerald-300 hover:text-white px-2 py-1 text-sm font-bold shrink-0">
+                    <i class="fas fa-times"></i> Tutup
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== BAGIAN BAWAH: 5 PANEL KELOMPOK (AREA SENTUH SISWA) ==================== -->
+        <section class="w-full h-[43%] min-h-[250px] max-h-[360px] shrink-0 flex flex-col justify-end">
+            <div id="teams-panel-container" class="w-full h-full grid grid-cols-5 gap-3.5">
+                <!-- Kelima Panel Kelompok Dirender via JS dengan jarak aman dan tombol A, B, C, D berukuran besar -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ======================================================================= -->
+    <!-- 3. HALAMAN HASIL AKHIR ARENA KUIS                                       -->
+    <!-- ======================================================================= -->
+    <section id="screen-final" class="hidden fixed inset-0 z-40 flex flex-col justify-between p-6 bg-gradient-to-b from-indigo-950 via-slate-900 to-slate-950 overflow-y-auto no-print">
+        <div class="max-w-6xl w-full mx-auto my-auto flex flex-col items-center">
+            
+            <!-- Header Hasil Akhir -->
+            <div class="inline-flex items-center gap-2 bg-amber-400/20 border border-amber-400 text-amber-300 px-5 py-1.5 rounded-full font-extrabold text-sm mb-2">
+                <i class="fas fa-sparkles"></i> PERMAINAN SELESAI • 10 SOAL TUNTAS
+            </div>
+            <h1 class="font-game text-4xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-100 to-amber-400 text-center mb-2">
+                🏆 HASIL AKHIR ARENA KUIS
+            </h1>
+
+            <!-- Banner Pengumuman Pemenang -->
+            <div id="final-winner-banner" class="w-full max-w-4xl bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 border-2 border-amber-400 rounded-3xl p-4 text-center mb-5 shadow-2xl">
+                <!-- Diisi via JS -->
+            </div>
+
+            <!-- Tabel Peringkat & Statistik Lengkap Kelima Kelompok -->
+            <div class="w-full bg-slate-900/90 border-2 border-slate-700 rounded-3xl overflow-hidden shadow-2xl mb-6">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800/90 text-slate-300 text-sm uppercase border-b border-slate-700">
+                            <th class="py-3.5 px-5 font-extrabold text-center w-24">Peringkat</th>
+                            <th class="py-3.5 px-5 font-extrabold">Nama Kelompok</th>
+                            <th class="py-3.5 px-5 font-extrabold text-center">Total Poin</th>
+                            <th class="py-3.5 px-5 font-extrabold text-center text-emerald-400">Jawaban Benar</th>
+                            <th class="py-3.5 px-5 font-extrabold text-center text-rose-400">Jawaban Salah</th>
+                            <th class="py-3.5 px-5 font-extrabold text-center text-slate-400">Tidak Dijawab</th>
+                            <th class="py-3.5 px-5 font-extrabold text-center text-sky-300">Akurasi Jawaban</th>
+                        </tr>
+                    </thead>
+                    <tbody id="final-leaderboard-body" class="divide-y divide-slate-800 text-base font-bold">
+                        <!-- Diisi via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Deretan Tombol Aksi Hasil Akhir -->
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <button onclick="openModal('modal-detail-history')" class="btn-touch bg-sky-600 hover:bg-sky-500 text-white font-game text-lg px-6 py-3.5 rounded-2xl border-2 border-sky-300 shadow-lg flex items-center gap-2.5">
+                    <i class="fas fa-list-check"></i> LIHAT RINCIAN HASIL
+                </button>
+                <button onclick="printQuizResults()" class="btn-touch bg-indigo-600 hover:bg-indigo-500 text-white font-game text-lg px-6 py-3.5 rounded-2xl border-2 border-indigo-300 shadow-lg flex items-center gap-2.5">
+                    <i class="fas fa-print"></i> CETAK HASIL
+                </button>
+                <button onclick="playAgainSameTeams()" class="btn-touch bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-game text-lg px-8 py-3.5 rounded-2xl border-2 border-emerald-200 shadow-lg flex items-center gap-2.5">
+                    <i class="fas fa-redo"></i> MAIN LAGI
+                </button>
+                <button onclick="openModal('modal-confirm-reset')" class="btn-touch bg-rose-600 hover:bg-rose-500 text-white font-game text-lg px-6 py-3.5 rounded-2xl border-2 border-rose-300 shadow-lg flex items-center gap-2.5">
+                    <i class="fas fa-power-off"></i> RESET PERMAINAN
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- 4. MODAL DIALOG (PENGATURAN, PETUNJUK, KONDISI C, SKOR, RINCIAN, RESET) -->
+    <!-- ======================================================================= -->
+
+    <!-- MODAL: PENGATURAN KELOMPOK & TIMER -->
+    <div id="modal-settings" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+        <div class="modal-pop bg-slate-900 border-2 border-amber-400 rounded-3xl max-w-3xl w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-5">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-users-cog text-3xl text-amber-400"></i>
+                    <h2 class="font-game text-2xl text-white">PENGATURAN KELOMPOK & TIMER</h2>
+                </div>
+                <button onclick="closeModal('modal-settings')" class="text-slate-400 hover:text-white text-2xl px-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- Input 5 Nama Kelompok -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400">Nama Kelima Kelompok Siswa:</label>
+                    <div id="settings-team-inputs" class="space-y-2.5">
+                        <!-- Diisi via JS -->
+                    </div>
+                </div>
+
+                <!-- Pengaturan Timer Babak -->
+                <div class="bg-slate-800/70 border border-slate-700 rounded-2xl p-4 flex flex-col justify-between">
+                    <div>
+                        <label class="block text-xs font-extrabold uppercase tracking-wider text-amber-400 mb-2">
+                            <i class="fas fa-clock mr-1"></i> Pengaturan Timer Babak (Opsional)
+                        </label>
+                        <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+                            Pilih durasi hitung mundur untuk setiap babak menjawab. Jika waktu habis, kelompok yang belum menjawab tidak langsung dianggap salah dan guru dapat memperpanjang waktu.
+                        </p>
+                        <div class="grid grid-cols-2 gap-2.5" id="timer-preset-buttons">
+                            <button type="button" onclick="selectTimerSetting(15)" data-sec="15" class="timer-opt-btn py-3 rounded-xl font-game text-base border-2">15 Detik</button>
+                            <button type="button" onclick="selectTimerSetting(20)" data-sec="20" class="timer-opt-btn py-3 rounded-xl font-game text-base border-2">20 Detik</button>
+                            <button type="button" onclick="selectTimerSetting(30)" data-sec="30" class="timer-opt-btn py-3 rounded-xl font-game text-base border-2">30 Detik</button>
+                            <button type="button" onclick="selectTimerSetting(0)" data-sec="0" class="timer-opt-btn py-3 rounded-xl font-game text-base border-2">Tanpa Timer</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-700 flex items-center justify-between text-xs text-slate-400">
+                        <span>Identitas warna tiap kelompok otomatis berbeda.</span>
+                        <button onclick="resetDefaultTeamNames()" class="text-amber-400 hover:underline font-bold">Kembalikan Default</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="saveSettings()" class="btn-touch bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-game text-lg px-8 py-3 rounded-2xl border-2 border-emerald-200 shadow-lg flex items-center gap-2">
+                    <i class="fas fa-save"></i> SIMPAN PENGATURAN
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PETUNJUK PERMAINAN -->
+    <div id="modal-instructions" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+        <div class="modal-pop bg-slate-900 border-2 border-sky-400 rounded-3xl max-w-4xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-book-open text-3xl text-sky-400"></i>
+                    <h2 class="font-game text-2xl text-white">PETUNJUK PERMAINAN — ARENA KUIS REBUTAN</h2>
+                </div>
+                <button onclick="closeModal('modal-instructions')" class="text-slate-400 hover:text-white text-2xl px-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm leading-relaxed text-slate-200 mb-6">
+                <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl space-y-2">
+                    <h3 class="font-game text-lg text-amber-400"><i class="fas fa-hand-pointer mr-1.5"></i> 1. Cara Siswa Menjawab di Layar PID</h3>
+                    <ul class="list-disc list-inside space-y-1.5 text-slate-300">
+                        <li>Kelima kelompok berdiri menghadap layar sentuh PID.</li>
+                        <li>Setiap kelompok memiliki <strong>panel warna tersendiri</strong> di bagian bawah layar dengan tombol <strong>A, B, C, dan D</strong>.</li>
+                        <li>Semua kelompok menjawab soal yang sama secara bersamaan dengan menyentuh langsung tombol pilihan pada panel kelompoknya.</li>
+                        <li>Setelah menyentuh pilihan, status panel berubah menjadi <strong>SUDAH MENJAWAB</strong> dan pilihan terkunci untuk babak tersebut.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl space-y-2">
+                    <h3 class="font-game text-lg text-emerald-400"><i class="fas fa-scale-balanced mr-1.5"></i> 2. Aturan Penilaian & Penguncian Soal</h3>
+                    <ul class="list-disc list-inside space-y-1.5 text-slate-300">
+                        <li>Guru menekan tombol <strong>KUNCI & TAMPILKAN HASIL</strong> untuk memeriksa jawaban seluruh kelompok secara serentak.</li>
+                        <li><strong>Ada Kelompok yang Benar:</strong> Setiap kelompok yang menjawab benar mendapat <strong>+100 Poin</strong>, soal otomatis <strong>TERKUNCI</strong>, dan pembahasan ditampilkan.</li>
+                        <li><strong>Semua Kelompok Salah:</strong> Tidak ada pengurangan poin (0 poin). Soal <strong>tetap terbuka</strong> dan semua kelompok boleh <strong>COBA LAGI</strong>!</li>
+                        <li><strong>Belum Menjawab:</strong> Tidak dihitung salah (0 poin).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="closeModal('modal-instructions')" class="btn-touch bg-sky-500 hover:bg-sky-400 text-slate-950 font-game text-lg px-8 py-3 rounded-2xl border-2 border-sky-200">
+                    MENGERTI & SIAP BERMAIN!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: KONDISI C (ADA KELOMPOK YANG BELUM MENJAWAB / WAKTU HABIS) -->
+    <div id="modal-unanswered" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+        <div class="modal-pop bg-slate-900 border-2 border-amber-400 rounded-3xl max-w-xl w-full p-6 shadow-2xl text-center">
+            <div class="w-16 h-16 rounded-full bg-amber-500/20 border-2 border-amber-400 text-amber-400 flex items-center justify-center text-3xl mx-auto mb-3">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            <h2 id="unanswered-modal-title" class="font-game text-2xl text-white mb-2">ADA KELOMPOK YANG BELUM MENJAWAB!</h2>
+            <p id="unanswered-modal-desc" class="text-slate-300 text-base mb-4"></p>
+            
+            <div id="unanswered-teams-list" class="flex flex-wrap justify-center gap-2 mb-6">
+                <!-- Badge kelompok yang belum menjawab -->
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button onclick="closeModal('modal-unanswered')" class="btn-touch bg-slate-700 hover:bg-slate-600 text-white font-game text-base py-3.5 px-4 rounded-2xl border border-slate-500 flex items-center justify-center gap-2">
+                    <i class="fas fa-pause-circle"></i> TUNGGU JAWABAN
+                </button>
+                <button onclick="teacherAddTimeFromModal(15)" class="btn-touch bg-sky-600 hover:bg-sky-500 text-white font-game text-base py-3.5 px-4 rounded-2xl border border-sky-300 flex items-center justify-center gap-2">
+                    <i class="fas fa-plus-circle"></i> TAMBAH WAKTU
+                </button>
+                <button onclick="teacherConfirmEvaluateNow()" class="btn-touch bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-game text-base py-3.5 px-4 rounded-2xl border-2 border-emerald-200 flex items-center justify-center gap-2">
+                    <i class="fas fa-flag-checkered"></i> AKHIRI BABAK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PAPAN SKOR LENGKAP SAAT PERMAINAN -->
+    <div id="modal-scoreboard" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+        <div class="modal-pop bg-slate-900 border-2 border-indigo-400 rounded-3xl max-w-4xl w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-ranking-star text-3xl text-amber-400"></i>
+                    <h2 class="font-game text-2xl text-white">PAPAN SKOR SEMENTARA — 5 KELOMPOK</h2>
+                </div>
+                <button onclick="closeModal('modal-scoreboard')" class="text-slate-400 hover:text-white text-2xl px-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-700 mb-5">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800 text-slate-300 text-xs uppercase border-b border-slate-700">
+                            <th class="py-3 px-4 text-center">Peringkat</th>
+                            <th class="py-3 px-4">Kelompok</th>
+                            <th class="py-3 px-4 text-center">Total Poin</th>
+                            <th class="py-3 px-4 text-center text-emerald-400">Benar</th>
+                            <th class="py-3 px-4 text-center text-rose-400">Salah</th>
+                            <th class="py-3 px-4 text-center text-slate-400">Tidak Menjawab</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-scoreboard-body" class="divide-y divide-slate-800 font-bold text-base">
+                        <!-- Diisi via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <button onclick="finishGameEarly()" class="btn-touch bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/50 font-bold text-xs px-4 py-2.5 rounded-xl">
+                    <i class="fas fa-trophy mr-1"></i> Tampilkan Halaman Hasil Akhir Sekarang
+                </button>
+                <button onclick="closeModal('modal-scoreboard')" class="btn-touch bg-indigo-600 hover:bg-indigo-500 text-white font-game text-base px-6 py-2.5 rounded-xl border border-indigo-400">
+                    TUTUP
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: RINCIAN HASIL PER SOAL -->
+    <div id="modal-detail-history" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+        <div class="modal-pop bg-slate-900 border-2 border-sky-400 rounded-3xl max-w-6xl w-full p-6 shadow-2xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-4 shrink-0">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-list-check text-2xl text-sky-400"></i>
+                    <h2 class="font-game text-2xl text-white">RINCIAN JAWABAN SELURUH SOAL (1 - 10)</h2>
+                </div>
+                <button onclick="closeModal('modal-detail-history')" class="text-slate-400 hover:text-white text-2xl px-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div id="detail-history-content" class="overflow-y-auto flex-1 space-y-3 pr-2">
+                <!-- Diisi via JS -->
+            </div>
+
+            <div class="pt-4 border-t border-slate-700 mt-4 flex justify-end shrink-0">
+                <button onclick="closeModal('modal-detail-history')" class="btn-touch bg-sky-500 hover:bg-sky-400 text-slate-950 font-game text-base px-8 py-2.5 rounded-xl">
+                    TUTUP RINCIAN
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: KONFIRMASI RESET PERMAINAN -->
+    <div id="modal-confirm-reset" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+        <div class="modal-pop bg-slate-900 border-2 border-rose-500 rounded-3xl max-w-md w-full p-6 shadow-2xl text-center">
+            <div class="w-16 h-16 rounded-full bg-rose-500/20 border-2 border-rose-500 text-rose-400 flex items-center justify-center text-3xl mx-auto mb-3">
+                <i class="fas fa-triangle-exclamation"></i>
+            </div>
+            <h2 class="font-game text-2xl text-white mb-2">RESET SELURUH PERMAINAN?</h2>
+            <p class="text-slate-300 text-sm mb-6">
+                Seluruh progres soal, penguncian soal, dan total skor kelima kelompok akan dihapus dan kembali ke awal (0 poin).
+            </p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeModal('modal-confirm-reset')" class="btn-touch bg-slate-700 hover:bg-slate-600 text-white font-game text-base px-6 py-3 rounded-2xl flex-1">
+                    BATAL
+                </button>
+                <button onclick="confirmFullResetGame()" class="btn-touch bg-rose-600 hover:bg-rose-500 text-white font-game text-base px-6 py-3 rounded-2xl border border-rose-300 flex-1">
+                    YA, RESET SEMUA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AREA CETAK (HANYA MUNCUL SAAT PRINT) -->
+    <div id="print-area" class="hidden"></div>
+
+    <!-- ======================================================================= -->
+    <!-- 5. JAVASCRIPT ENGINE: DATA SOAL, STATE, AUDIO & INTERAKSI SENTUH        -->
+    <!-- ======================================================================= -->
+    <script>
+        /***********************************************************************
+         * 10 SOAL RESMI DARI DOKUMEN KUIS KELOMPOK.DOCX (SD KELAS 6)
+         ***********************************************************************/
+        const QUESTIONS_BANK = [
+            {
+                id: 1,
+                question: "Norma yang dibuat oleh negara/pemerintah, bersifat tertulis, dan mengikat seluruh warga disebut norma…",
+                options: {
+                    A: "Agama",
+                    B: "Kesusilaan",
+                    C: "Kesopanan",
+                    D: "Hukum"
+                },
+                correct: "D",
+                explanation: "Norma hukum dibuat secara resmi oleh lembaga negara/pemerintah, bersifat tertulis, dan memiliki sanksi tegas yang mengikat seluruh warga negara."
+            },
+            {
+                id: 2,
+                question: "Norma yang mengatur hubungan manusia dengan Tuhan Yang Maha Esa disebut norma…",
+                options: {
+                    A: "Agama",
+                    B: "Kesusilaan",
+                    C: "Kesopanan",
+                    D: "Hukum"
+                },
+                correct: "A",
+                explanation: "Norma agama bersumber dari wahyu Tuhan Yang Maha Esa dan mengatur ibadah serta hubungan manusia dengan Tuhan maupun sesama."
+            },
+            {
+                id: 3,
+                question: "Memotong antrean saat membeli sesuatu di kantin sekolah merupakan pelanggaran norma…",
+                options: {
+                    A: "Hukum",
+                    B: "Agama",
+                    C: "Kesopanan",
+                    D: "Bukan pelanggaran norma apa pun"
+                },
+                correct: "C",
+                explanation: "Mengantre dengan tertib adalah wujud tata krama dan menghargai orang lain dalam pergaulan sehari-hari (norma kesopanan)."
+            },
+            {
+                id: 4,
+                question: "Bagi yang percaya, sanksi berupa dosa dan pertanggungjawaban di akhirat berasal dari pelanggaran norma…",
+                options: {
+                    A: "Agama",
+                    B: "Kesusilaan",
+                    C: "Kesopanan",
+                    D: "Hukum"
+                },
+                correct: "A",
+                explanation: "Sanksi pelanggaran norma agama berupa dosa dan balasan dari Tuhan di akhirat kelak."
+            },
+            {
+                id: 5,
+                question: "Memakai helm saat mengendarai sepeda motor adalah contoh penerapan norma…",
+                options: {
+                    A: "Kesopanan",
+                    B: "Kesusilaan",
+                    C: "Hukum",
+                    D: "Agama"
+                },
+                correct: "C",
+                explanation: "Kewajiban memakai helm diatur dalam Undang-Undang Lalu Lintas demi keselamatan dan merupakan contoh ketaatan pada norma hukum."
+            },
+            {
+                id: 6,
+                question: "Salah satu ciri khas norma kesopanan adalah…",
+                options: {
+                    A: "Sama persis di semua tempat",
+                    B: "Berbeda-beda sesuai adat dan budaya setempat",
+                    C: "Hanya berlaku di sekolah",
+                    D: "Dibuat oleh pemerintah pusat"
+                },
+                correct: "B",
+                explanation: "Norma kesopanan tumbuh dari kebiasaan, adat istiadat, dan budaya masyarakat sehingga dapat berbeda antara satu daerah dengan daerah lainnya."
+            },
+            {
+                id: 7,
+                question: "Jika ada teman yang melanggar Kesepakatan Kelas, sikap yang tepat adalah…",
+                options: {
+                    A: "Membiarkan saja",
+                    B: "Mengingatkannya dengan cara yang baik",
+                    C: "Melaporkan ke polisi",
+                    D: "Menjauhinya selamanya"
+                },
+                correct: "B",
+                explanation: "Ketika teman lupa atau melanggar kesepakatan kelas, kita sebaiknya menegur dan mengingatkannya secara sopan dan penuh persahabatan."
+            },
+            {
+                id: 8,
+                question: "Salah satu manfaat menaati norma dalam kehidupan bermasyarakat adalah…",
+                options: {
+                    A: "Membuat hidup lebih sulit",
+                    B: "Menciptakan ketertiban dan kerukunan bersama",
+                    C: "Hanya menguntungkan aparat",
+                    D: "Membatasi kebebasan tanpa manfaat"
+                },
+                correct: "B",
+                explanation: "Norma hadir untuk menjaga keteraturan sosial, melindungi hak sesama, serta menciptakan ketertiban dan kerukunan."
+            },
+            {
+                id: 9,
+                question: "Berikut ini adalah contoh penerapan norma hukum dalam kehidupan berbangsa dan bernegara, KECUALI…",
+                options: {
+                    A: "Membayar pajak tepat waktu",
+                    B: "Mematuhi rambu lalu lintas",
+                    C: "Menyapa tetangga dengan ramah",
+                    D: "Memiliki KTP saat sudah cukup umur"
+                },
+                correct: "C",
+                explanation: "Menyapa tetangga dengan ramah merupakan contoh penerapan norma kesopanan, sedangkan membayar pajak, mematuhi rambu, dan memiliki KTP adalah norma hukum."
+            },
+            {
+                id: 10,
+                question: "Jika seluruh warga masyarakat menaati norma agama, kesusilaan, kesopanan, dan hukum secara bersama-sama, maka kehidupan bermasyarakat akan menjadi…",
+                options: {
+                    A: "Penuh konflik dan ketidakpastian",
+                    B: "Tertib, aman, dan nyaman bagi semua orang",
+                    C: "Membosankan karena terlalu banyak aturan",
+                    D: "Hanya menguntungkan sebagian orang"
+                },
+                correct: "B",
+                explanation: "Keempat norma saling melengkapi untuk mewujudkan masyarakat yang tertib, aman, damai, dan nyaman bagi seluruh warga."
+            }
+        ];
+
+        /***********************************************************************
+         * IDENTITAS WARNA KE-5 KELOMPOK (KONTRAS TINGGI UNTUK PID)
+         ***********************************************************************/
+        const TEAM_THEMES = [
+            {
+                id: 0,
+                defaultName: "KELOMPOK 1",
+                colorName: "Merah",
+                bgPanel: "from-rose-950/95 to-slate-900/95",
+                borderPanel: "border-rose-500",
+                headerBg: "bg-rose-600",
+                badgeText: "text-rose-300",
+                btnReady: "bg-gradient-to-b from-rose-500 to-rose-700 hover:from-rose-400 hover:to-rose-600 text-white border-rose-300",
+                accentHex: "#f43f5e"
+            },
+            {
+                id: 1,
+                defaultName: "KELOMPOK 2",
+                colorName: "Biru",
+                bgPanel: "from-sky-950/95 to-slate-900/95",
+                borderPanel: "border-sky-500",
+                headerBg: "bg-sky-600",
+                badgeText: "text-sky-300",
+                btnReady: "bg-gradient-to-b from-sky-500 to-sky-700 hover:from-sky-400 hover:to-sky-600 text-white border-sky-300",
+                accentHex: "#0ea5e9"
+            },
+            {
+                id: 2,
+                defaultName: "KELOMPOK 3",
+                colorName: "Hijau",
+                bgPanel: "from-emerald-950/95 to-slate-900/95",
+                borderPanel: "border-emerald-500",
+                headerBg: "bg-emerald-600",
+                badgeText: "text-emerald-300",
+                btnReady: "bg-gradient-to-b from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white border-emerald-300",
+                accentHex: "#10b981"
+            },
+            {
+                id: 3,
+                defaultName: "KELOMPOK 4",
+                colorName: "Kuning",
+                bgPanel: "from-amber-950/95 to-slate-900/95",
+                borderPanel: "border-amber-400",
+                headerBg: "bg-amber-500 text-slate-950",
+                badgeText: "text-amber-300",
+                btnReady: "bg-gradient-to-b from-amber-400 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 border-amber-200",
+                accentHex: "#f59e0b"
+            },
+            {
+                id: 4,
+                defaultName: "KELOMPOK 5",
+                colorName: "Ungu",
+                bgPanel: "from-purple-950/95 to-slate-900/95",
+                borderPanel: "border-purple-500",
+                headerBg: "bg-purple-600",
+                badgeText: "text-purple-300",
+                btnReady: "bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white border-purple-300",
+                accentHex: "#a855f7"
+            }
+        ];
+
+        /***********************************************************************
+         * WEB AUDIO SYNTHESIZER (TANPA FILE EKSTERNAL — OFFLINE READY)
+         ***********************************************************************/
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function getAudioCtx() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playTone(type) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioCtx();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+
+                if (type === 'select') {
+                    // Bunyi klik mantap saat kelompok memilih jawaban
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(520, now);
+                    osc.frequency.exponentialRampToValueAtTime(780, now + 0.09);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'success') {
+                    // Fanfare jawaban benar
+                    const notes = [523.25, 659.25, 783.99, 1046.5];
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        gain.gain.setValueAtTime(0.22, now + idx * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.28);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + idx * 0.08);
+                        osc.stop(now + idx * 0.08 + 0.29);
+                    });
+                } else if (type === 'retry') {
+                    // Bunyi saat semua salah / coba lagi
+                    const notes = [349.23, 311.13];
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.15);
+                        gain.gain.setValueAtTime(0.15, now + idx * 0.15);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.15 + 0.22);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + idx * 0.15);
+                        osc.stop(now + idx * 0.15 + 0.24);
+                    });
+                } else if (type === 'tick') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, now);
+                    gain.gain.setValueAtTime(0.07, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'victory') {
+                    const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5];
+                    const times = [0, 0.12, 0.24, 0.36, 0.52, 0.68];
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + times[idx]);
+                        gain.gain.setValueAtTime(0.25, now + times[idx]);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + times[idx] + 0.35);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + times[idx]);
+                        osc.stop(now + times[idx] + 0.36);
+                    });
+                }
+            } catch (e) {
+                // Abaikan jika browser memblokir audio sebelum interaksi
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('btn-sound-home');
+            if (btn) {
+                btn.innerHTML = soundEnabled
+                    ? '<i class="fas fa-volume-up text-lg"></i> <span>Suara: ON</span>'
+                    : '<i class="fas fa-volume-mute text-lg text-slate-400"></i> <span class="text-slate-400">Suara: OFF</span>';
+            }
+        }
+
+        /***********************************************************************
+         * STATE PERMAINAN & PENYIMPANAN LOCALSTORAGE
+         ***********************************************************************/
+        const STORAGE_KEY = 'ARENA_KUIS_REBUTAN_5_KELOMPOK_V1';
+        let timerInterval = null;
+
+        function createInitialState() {
+            return {
+                screen: 'HOME', // HOME | GAME | FINAL
+                currentQuestionIndex: 0,
+                timerDuration: 20, // Default 20 detik (dapat diatur 15, 20, 30, atau 0)
+                timeLeft: 20,
+                teams: TEAM_THEMES.map(t => ({
+                    id: t.id,
+                    name: t.defaultName,
+                    score: 0,
+                    correctCount: 0,
+                    wrongCount: 0,
+                    unansweredCount: 0
+                })),
+                questionStates: QUESTIONS_BANK.map(q => ({
+                    id: q.id,
+                    // Status Soal sesuai spesifikasi: BELUM DIMULAI | BABAK MENJAWAB | MENUNGGU HASIL | SOAL TERKUNCI
+                    status: 'BELUM DIMULAI',
+                    locked: false,
+                    pointsAwarded: false,
+                    attempts: 0,
+                    showExplanation: false,
+                    currentChoices: [null, null, null, null, null], // Pilihan 5 kelompok pada babak aktif
+                    lastEvaluation: null // Menyimpan hasil pemeriksaan babak terakhir { choices: [...], outcomes: [...], anyCorrect: bool }
+                }))
+            };
+        }
+
+        let gameState = loadStateFromStorage();
+
+        function saveStateToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+            } catch (e) {
+                console.warn('Gagal menyimpan state ke localStorage:', e);
+            }
+        }
+
+        function loadStateFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && Array.isArray(parsed.teams) && parsed.teams.length === 5 && Array.isArray(parsed.questionStates)) {
+                        return parsed;
+                    }
+                }
+            } catch (e) {
+                console.warn('Gagal memuat state dari localStorage:', e);
+            }
+            return createInitialState();
+        }
+
+        /***********************************************************************
+         * MANAJEMEN NAVIGASI LAYAR & TIMER
+         ***********************************************************************/
+        function initApp() {
+            renderHomeTeamBadges();
+            renderSettingsInputs();
+
+            if (gameState.screen === 'GAME') {
+                showScreen('GAME');
+                startOrResumeCurrentQuestion();
+            } else if (gameState.screen === 'FINAL') {
+                showScreen('FINAL');
+                renderFinalScreen();
+            } else {
+                showScreen('HOME');
+            }
+        }
+
+        function showScreen(screenName) {
+            gameState.screen = screenName;
+            document.getElementById('screen-home').classList.toggle('hidden', screenName !== 'HOME');
+            document.getElementById('screen-game').classList.toggle('hidden', screenName !== 'GAME');
+            document.getElementById('screen-final').classList.toggle('hidden', screenName !== 'FINAL');
+
+            if (screenName !== 'FINAL') {
+                stopConfetti();
+            }
+            if (screenName !== 'GAME') {
+                stopRoundTimer();
+            }
+            saveStateToStorage();
+        }
+
+        function startGame() {
+            playTone('select');
+            // Jika semua soal sudah terkunci, tanyakan apakah ingin main ulang atau lihat hasil akhir
+            const allCompleted = gameState.questionStates.every(qs => qs.locked);
+            if (allCompleted) {
+                showScreen('FINAL');
+                renderFinalScreen();
+                return;
+            }
+            showScreen('GAME');
+            startOrResumeCurrentQuestion();
+        }
+
+        function goHomeScreen() {
+            stopRoundTimer();
+            renderHomeTeamBadges();
+            showScreen('HOME');
+        }
+
+        function startOrResumeCurrentQuestion() {
+            const qState = gameState.questionStates[gameState.currentQuestionIndex];
+            if (qState.status === 'BELUM DIMULAI') {
+                qState.status = 'BABAK MENJAWAB';
+                gameState.timeLeft = gameState.timerDuration;
+            }
+            renderGameArena();
+            if (qState.status === 'BABAK MENJAWAB' && !qState.locked) {
+                startRoundTimer();
+            } else {
+                stopRoundTimer();
+                updateTimerDisplayUI();
+            }
+            saveStateToStorage();
+        }
+
+        function startRoundTimer() {
+            stopRoundTimer();
+            const qState = gameState.questionStates[gameState.currentQuestionIndex];
+            if (gameState.timerDuration <= 0 || qState.locked || qState.status !== 'BABAK MENJAWAB') {
+                updateTimerDisplayUI();
+                return;
+            }
+            if (gameState.timeLeft <= 0) {
+                gameState.timeLeft = gameState.timerDuration;
+            }
+            updateTimerDisplayUI();
+
+            timerInterval = setInterval(() => {
+                const currQState = gameState.questionStates[gameState.currentQuestionIndex];
+                if (currQState.status !== 'BABAK MENJAWAB' || currQState.locked) {
+                    stopRoundTimer();
+                    return;
+                }
+
+                if (gameState.timeLeft > 0) {
+                    gameState.timeLeft--;
+                    if (gameState.timeLeft <= 5 && gameState.timeLeft > 0) {
+                        playTone('tick');
+                    }
+                    updateTimerDisplayUI();
+                } else {
+                    stopRoundTimer();
+                    handleTimerExpired();
+                }
+            }, 1000);
+        }
+
+        function stopRoundTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimerDisplayUI() {
+            const display = document.getElementById('timer-display');
+            const box = document.getElementById('timer-box');
+            if (!display || !box) return;
+
+            if (gameState.timerDuration <= 0) {
+                display.textContent = '∞';
+                box.className = 'flex items-center gap-2 bg-slate-950 border-2 border-slate-700 px-3 py-1.5 rounded-xl';
+                return;
+            }
+
+            display.textContent = `${gameState.timeLeft}s`;
+            if (gameState.timeLeft <= 5) {
+                box.className = 'flex items-center gap-2 bg-rose-950 border-2 border-rose-500 px-3 py-1.5 rounded-xl animate-pulse';
+            } else {
+                box.className = 'flex items-center gap-2 bg-slate-950 border-2 border-slate-700 px-3 py-1.5 rounded-xl';
+            }
+        }
+
+        function handleTimerExpired() {
+            // Sesuai spesifikasi:
+            // Jika timer habis: Jangan langsung menganggap kelompok yang belum menjawab sebagai salah.
+            // Tampilkan tombol untuk mengakhiri babak. Guru dapat memperpanjang waktu atau menampilkan hasil.
+            const qState = gameState.questionStates[gameState.currentQuestionIndex];
+            if (qState.locked) return;
+
+            playTone('retry');
+            openUnansweredOrTimeUpModal(true);
+            renderGameArena();
+        }
+
+        /***********************************************************************
+         * INTERAKSI SENTUH KELOMPOK (MEMILIH JAWABAN A, B, C, D)
+         ***********************************************************************/
+        function selectTeamAnswer(teamIndex, optionLetter) {
+            const qState = gameState.questionStates[gameState.currentQuestionIndex];
+
+            // Pastikan soal sedang pada babak menjawab dan belum terkunci
+            if (qState.locked || qState.status !== 'BABAK MENJAWAB') {
+                return;
+            }
+
+            // Kelompok yang telah memilih jawaban tidak dapat mengubah jawabannya selama babak berlangsung
+            if (qState.currentChoices[teamIndex] !== null) {
+                return;
+            }
+
+            // Simpan jawaban kelompok tersebut secara terpisah
+            qState.currentChoices[teamIndex] = optionLetter;
+            playTone('select');
+
+            // Jika kelima kelompok sudah menjawab semua, ubah status ke MENUNGGU HASIL
+            const allAnswered = qState.currentChoices.every(choice => choice !== null);
+            if (allAnswered) {
+                qState.status = 'MENUNGGU HASIL';
+                stopRoundTimer();
+            }
+
+            saveStateToStorage();
+            renderGameArena();
+        }
+
+        /***********************************************************************
+         * LOGIKA PENILAIAN GURU (KONDISI A, B, DAN C)
+         ***********************************************************************/
+        function teacherTriggerEvaluate() {
+            const qState = gameState.questionStates[gameState.currentQuestionIndex];
+            if (qState.locked) return;
+
+            // Cek apakah ada kelompok yang belum menjawab (KONDISI C)
+            const unansweredTeams = [];
+            qState.currentChoices.forEach((choice, idx) => {
+                if (choice === null) unansweredTeams.push(gameState.teams[idx]);
+            });
+
+            if (unansweredTeams.length > 0) {
+                openUnansweredOrTimeUpModal(false);
+                return;
+            }
+
+            // Jika semua kelompok sudah memilih jawaban, langsung evaluasi
+            executeRoundEvaluation();
+        }
+
+        function openUnansweredOrTimeUpModal(isTimeUp) {
+            const qState = gameState.questionStates[gameState.currentQuestionIndex];
+            const unansweredTeams = [];
+            qState.currentChoices.forEach((choice, idx) => {
+                if (choice === null) unansweredTeams.push(gameState.teams[idx]);
+            });
+
+            const titleEl = document.getElementById('unanswered-modal-title');
+            const descEl = document.getElementById('unanswered-modal-desc');
+            const listEl = document.getElementById('unanswered-teams-list');
+
+            if (isTimeUp) {
+                titleEl.textContent = "WAKTU HABIS!";
+                descEl.textContent = unansweredTeams.length > 0
+                    ? `Waktu babak telah habis dan masih ada ${unansweredTeams.length} kelompok yang belum menjawab. Kelompok yang belum menjawab tidak langsung dianggap salah. Pilih tindakan guru:`
+                    : `Waktu babak telah habis dan seluruh kelompok sudah memilih jawaban. Silakan tampilkan hasil babak ini.`;
+            } else {
+                titleEl.textContent = "ADA KELOMPOK YANG BELUM MENJAWAB!";
+                descEl.textContent = `Terdapat ${unansweredTeams.length} kelompok yang belum mengunci pilihan jawabannya. Jika babak diakhiri sekarang, kelompok yang belum menjawab mendapat 0 poin dan tidak dihitung salah.`;
+            }
+
+            listEl.innerHTML = unansweredTeams.map(t => {
+                const theme = TEAM_THEMES[t.id];
+                return `<span class="${theme.headerBg} px-3.5 py-1.5 rounded-xl font-game text-sm shadow">${escapeHtml(t.name)}</span>`;
+            }).join('');
+
+            openModal('modal-unanswered');
+        }
+
+        function teacherAddTimeFromModal(seconds) {
+            closeModal('modal-unanswered');
+            teacherAddTime(seconds);
+        }
+
+        function teacherConfirmEvaluateNow() {
+            closeModal('modal-unanswered');
+            executeRoundEvaluation();
+        }
+
+        function executeRoundEvaluation() {
+            stopRoundTimer();
+            const qIndex = gameState.currentQuestionIndex;
+            const qData = QUESTIONS_BANK[qIndex];
+            const qState = gameState.questionStates[qIndex];
+
+            // Pastikan soal yang sudah terkunci tidak dapat memberikan poin lagi
+            if (qState.locked || qState.pointsAwarded) {
+                return;
+            }
+
+            qState.attempts += 1;
+            const choicesSnapshot = [...qState.currentChoices];
+
+            // Cek apakah ada minimal satu kelompok yang menjawab benar
+            const anyCorrect = choicesSnapshot.some(choice => choice === qData.correct);
+            const anySubmitted = choicesSnapshot.some(choice => choice !== null);
+
+            const outcomes = []; // 'CORRECT' | 'WRONG' | 'UNANSWERED'
+
+            if (anyCorrect) {
+                // ===============================================================
+                // KONDISI A — ADA MINIMAL SATU KELOMPOK YANG BENAR
+                // ===============================================================
+                choicesSnapshot.forEach((choice, teamIdx) => {
+                    const team = gameState.teams[teamIdx];
+                    if (choice === qData.correct) {
+                        outcomes.push('CORRECT');
+                        team.score += 100;
+                        team.correctCount += 1;
+                    } else if (choice === null) {
+                        outcomes.push('UNANSWERED');
+                        team.unansweredCount += 1;
+                    } else {
+                        outcomes.push('WRONG');
+                        team.wrongCount += 1;
+                    }
+                });
+
+                qState.locked = true;
+                qState.pointsAwarded = true;
+                qState.status = 'SOAL TERKUNCI';
+                qState.showExplanation = true; // Tampilkan pembahasan singkat otomatis saat terkunci
+                qState.lastEvaluation = {
+                    choices: choicesSnapshot,
+                    outcomes: outcomes,
+                    anyCorrect: true
+                };
+
+                playTone('success');
+            } else {
+                // ===============================================================
+                // KONDISI B — SEMUA KELOMPOK YANG MENJAWAB SALAH (ATAU BELUM ADA YANG BENAR)
+                // ===============================================================
+                choicesSnapshot.forEach((choice, teamIdx) => {
+                    const team = gameState.teams[teamIdx];
+                    if (choice === null) {
+                        outcomes.push('UNANSWERED');
+                        // Sesuai aturan: Kelompok yang belum menjawab tidak mendapat poin dan tidak dihitung sebagai jawaban salah.
+                    } else {
+                        outcomes.push('WRONG');
+                        team.wrongCount += 1;
+                    }
+                });
+
+                // Jangan mengunci soal & jangan mengurangi skor kelompok
+                qState.locked = false;
+                qState.status = 'MENUNGGU HASIL';
+                qState.showExplanation = false; // Pembahasan hanya tampil jika guru memilih mengungkapkannya
+                qState.lastEvaluation = {
+                    choices: choicesSnapshot,
+                    outcomes: outcomes,
+                    anyCorrect: false,
+                    anySubmitted: anySubmitted
+                };
+
+                playTone('retry');
+            }
+
+            saveStateToStorage();
+            renderGameArena();
+        }
+
+        // Tombol COBA LAGI ketika semua kelompok salah (Kondisi B)
+        function teacherRetrySameQuestion() {
+            const qState = gameState.questionStates[gameState.currentQuestionIndex];
+            if (qState.locked) return;
+
+            playTone('select');
+            qState.currentChoices = [null, null, null, null, null];
+            qState.lastEvaluation = null;
+            qState.status = 'BABAK MENJAWAB';
+            qState.showExplanation = false;
+            gameState.timeLeft = gameState.timerDuration;
+
+            saveStateToStorage();
+            renderGameArena();
+            startRoundTimer();
+        }
+
+        // Tombol RESET BABAK oleh Guru (Hanya menghapus jawaban babak saat ini, bukan skor keseluruhan)
+        function teacherResetRound() {
+            const qState = gameState.questionStates[gameState.currentQuestionIndex];
+            if (qState.locked) return;
+
+            playTone('select');
+            qState.currentChoices = [null, null, null, null, null];
+            qState.lastEvaluation = null;
+            qState.status = 'BABAK MENJAWAB';
+            qState.showExplanation = false;
+            gameState.timeLeft = gameState.timerDuration;
+
+            saveStateToStorage();
+            renderGameArena();
+            startRoundTimer();
+        }
+
+        // Tombol TAMBAH WAKTU oleh Guru
+        function teacherAddTime(seconds = 15) {
+            const qState = gameState.questionStates[gameState.currentQuestionIndex];
+            if (qState.locked) return;
+
+            playTone('select');
+            if (gameState.timerDuration <= 0) {
+                gameState.timerDuration = 20;
+            }
+            if (qState.status === 'MENUNGGU HASIL' && !qState.lastEvaluation) {
+                qState.status = 'BABAK MENJAWAB';
+            }
+            gameState.timeLeft += seconds;
+            updateTimerDisplayUI();
+            if (!timerInterval && qState.status === 'BABAK MENJAWAB') {
+                startRoundTimer();
+            }
+            saveStateToStorage();
+            renderGameArena();
+        }
+
+        // Tombol TAMPILKAN / SEMBUNYIKAN PEMBAHASAN oleh Guru
+        function toggleExplanation(forceState) {
+            const qState = gameState.questionStates[gameState.currentQuestionIndex];
+            qState.showExplanation = typeof forceState === 'boolean' ? forceState : !qState.showExplanation;
+            saveStateToStorage();
+            renderGameArena();
+        }
+
+        // Tombol SOAL BERIKUTNYA
+        function teacherNextQuestion() {
+            playTone('select');
+            // Cari soal berikutnya yang belum terkunci, atau maju 1 indeks
+            if (gameState.currentQuestionIndex < QUESTIONS_BANK.length - 1) {
+                gameState.currentQuestionIndex += 1;
+                startOrResumeCurrentQuestion();
+            } else {
+                // Cek apakah semua soal selesai atau langsung menuju halaman Hasil Akhir
+                showScreen('FINAL');
+                renderFinalScreen();
+            }
+        }
+
+        // Tombol LEWATI SOAL
+        function teacherSkipQuestion() {
+            playTone('select');
+            stopRoundTimer();
+            if (gameState.currentQuestionIndex < QUESTIONS_BANK.length - 1) {
+                gameState.currentQuestionIndex += 1;
+                startOrResumeCurrentQuestion();
+            } else {
+                // Jika di soal ke-10, cari apakah ada soal sebelumnya yang belum terkunci
+                const firstUnlocked = gameState.questionStates.findIndex(qs => !qs.locked);
+                if (firstUnlocked !== -1 && firstUnlocked !== gameState.currentQuestionIndex) {
+                    gameState.currentQuestionIndex = firstUnlocked;
+                    startOrResumeCurrentQuestion();
+                } else {
+                    showScreen('FINAL');
+                    renderFinalScreen();
+                }
+            }
+        }
+
+        // Navigasi langsung dengan menekan titik indikator soal di bagian atas
+        function jumpToQuestion(index) {
+            if (index < 0 || index >= QUESTIONS_BANK.length) return;
+            playTone('select');
+            stopRoundTimer();
+            gameState.currentQuestionIndex = index;
+            startOrResumeCurrentQuestion();
+        }
+
+        /***********************************************************************
+         * RENDER ANTARMUKA ARENA KUIS (16:9 PID TOUCHSCREEN)
+         ***********************************************************************/
+        function renderGameArena() {
+            const qIndex = gameState.currentQuestionIndex;
+            const qData = QUESTIONS_BANK[qIndex];
+            const qState = gameState.questionStates[qIndex];
+
+            // 1. Update Nomor Soal & Badge Status Soal
+            document.getElementById('question-counter').textContent = `SOAL ${qIndex + 1} / ${QUESTIONS_BANK.length}`;
+            const stateBadge = document.getElementById('question-state-badge');
+
+            if (qState.locked) {
+                stateBadge.textContent = '🔒 SOAL TERKUNCI';
+                stateBadge.className = 'px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/50';
+            } else if (qState.lastEvaluation && !qState.lastEvaluation.anyCorrect) {
+                stateBadge.textContent = '⚠️ COBA LAGI (TERBUKA)';
+                stateBadge.className = 'px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-400/50';
+            } else if (qState.status === 'MENUNGGU HASIL') {
+                stateBadge.textContent = '⏳ MENUNGGU HASIL';
+                stateBadge.className = 'px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider bg-sky-500/20 text-sky-300 border border-sky-400/50';
+            } else {
+                stateBadge.textContent = '🟢 BABAK MENJAWAB';
+                stateBadge.className = 'px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/50';
+            }
+
+            // 2. Render Indikator Progres 10 Soal
+            const dotsContainer = document.getElementById('progress-dots');
+            dotsContainer.innerHTML = QUESTIONS_BANK.map((q, idx) => {
+                const st = gameState.questionStates[idx];
+                const isCurrent = idx === qIndex;
+                let bgClass = 'bg-slate-700 text-slate-300 border-slate-600';
+                if (st.locked) {
+                    bgClass = 'bg-emerald-500 text-slate-950 border-emerald-300 font-black';
+                } else if (isCurrent) {
+                    bgClass = 'bg-amber-400 text-slate-950 border-white font-black scale-110';
+                }
+                return `
+                    <button onclick="jumpToQuestion(${idx})" title="Soal ${idx + 1}" class="w-6 h-6 rounded-lg text-xs border ${bgClass} flex items-center justify-center transition-transform">
+                        ${st.locked ? '<i class="fas fa-lock text-[10px]"></i>' : (idx + 1)}
+                    </button>
+                `;
+            }).join('');
+
+            // 3. Render Papan Skor Ringkas 5 Kelompok di Header Atas
+            const miniScoreboard = document.getElementById('top-mini-scoreboard');
+            miniScoreboard.innerHTML = gameState.teams.map((team, idx) => {
+                const theme = TEAM_THEMES[idx];
+                return `
+                    <div class="flex items-center gap-2 bg-slate-950/90 border ${theme.borderPanel} px-2.5 py-1 rounded-xl shrink-0">
+                        <span class="w-2.5 h-2.5 rounded-full ${theme.headerBg}"></span>
+                        <span class="text-xs font-extrabold text-slate-200 max-w-[95px] truncate">${escapeHtml(team.name)}</span>
+                        <span class="font-game text-sm ${theme.badgeText} bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-800">${team.score}</span>
+                    </div>
+                `;
+            }).join('');
+
+            // 4. Atur Visibilitas Tombol Kontrol Guru di Header Atas
+            const btnEvaluate = document.getElementById('btn-evaluate');
+            const btnNext = document.getElementById('btn-next-question');
+            const btnResetRound = document.getElementById('btn-reset-round');
+            const btnAddTime = document.getElementById('btn-add-time');
+
+            if (qState.locked) {
+                btnEvaluate.classList.add('hidden');
+                btnNext.classList.remove('hidden');
+                btnNext.innerHTML = qIndex === QUESTIONS_BANK.length - 1
+                    ? '<span>LIHAT HASIL AKHIR</span> <i class="fas fa-trophy text-base"></i>'
+                    : '<span>SOAL BERIKUTNYA</span> <i class="fas fa-arrow-right text-base"></i>';
+                btnResetRound.disabled = true;
+                btnAddTime.disabled = true;
+            } else {
+                btnEvaluate.classList.remove('hidden');
+                btnNext.classList.add('hidden');
+                btnResetRound.disabled = false;
+                btnAddTime.disabled = false;
+            }
+
+            // 5. Render Banner Feedback Babak (Jika baru saja dievaluasi)
+            renderFeedbackBanner(qData, qState, qIndex);
+
+            // 6. Render Teks Pertanyaan & 4 Kartu Opsi Bacaan
+            document.getElementById('question-text').textContent = qData.question;
+
+            const optionsBoard = document.getElementById('question-options-board');
+            const optionLetters = ['A', 'B', 'C', 'D'];
+            optionsBoard.innerHTML = optionLetters.map(letter => {
+                const isCorrectOption = qData.correct === letter;
+                // Kunci jawaban HANYA boleh terlihat jika soal sudah TERKUNCI atau guru menekan Tampilkan Pembahasan
+                const revealAnswerKey = qState.locked || qState.showExplanation;
+
+                let cardStyle = 'bg-slate-800/90 border-slate-600/80 text-white';
+                let badgeStyle = 'bg-indigo-600 text-white border-indigo-400';
+
+                if (revealAnswerKey && isCorrectOption) {
+                    cardStyle = 'bg-emerald-900/90 border-emerald-400 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.35)]';
+                    badgeStyle = 'bg-emerald-400 text-slate-950 border-white';
+                }
+
+                return `
+                    <div class="flex items-center gap-3 p-3 rounded-2xl border-2 ${cardStyle} transition-all">
+                        <div class="w-10 h-10 rounded-xl font-game text-xl flex items-center justify-center border shrink-0 ${badgeStyle}">
+                            ${letter}
+                        </div>
+                        <div class="font-extrabold text-base lg:text-lg leading-snug flex-1">
+                            ${escapeHtml(qData.options[letter])}
+                        </div>
+                        ${revealAnswerKey && isCorrectOption ? '<i class="fas fa-check-circle text-2xl text-emerald-400 shrink-0"></i>' : ''}
+                    </div>
+                `;
+            }).join('');
+
+            // 7. Render Panel Pembahasan Singkat
+            const expPanel = document.getElementById('explanation-panel');
+            if (qState.showExplanation) {
+                expPanel.classList.remove('hidden');
+                document.getElementById('explanation-text').textContent = `Kunci Jawaban: ${qData.correct}. ${qData.explanation}`;
+            } else {
+                expPanel.classList.add('hidden');
+            }
+
+            // 8. Render 5 Panel Kelompok di Bagian Bawah (Area Sentuh Siswa)
+            renderFiveTeamPanels(qData, qState);
+        }
+
+        function renderFeedbackBanner(qData, qState, qIndex) {
+            const banner = document.getElementById('round-feedback-banner');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const subtitle = document.getElementById('feedback-subtitle');
+            const actions = document.getElementById('feedback-actions');
+
+            if (!qState.lastEvaluation) {
+                banner.classList.add('hidden');
+                return;
+            }
+
+            banner.classList.remove('hidden');
+
+            if (qState.lastEvaluation.anyCorrect) {
+                // KONDISI A: Minimal satu kelompok benar
+                const winnersNames = [];
+                qState.lastEvaluation.outcomes.forEach((out, idx) => {
+                    if (out === 'CORRECT') winnersNames.push(gameState.teams[idx].name);
+                });
+
+                banner.className = 'w-full mb-2 px-4 py-2 rounded-2xl border-2 bg-emerald-950/95 border-emerald-400 text-emerald-100 flex items-center justify-between gap-4 shadow-xl shrink-0 z-10';
+                icon.className = 'fas fa-trophy text-2xl text-amber-400';
+                title.textContent = `HEBAT! SOAL TERKUNCI — ${winnersNames.join(', ')} MENJAWAB BENAR (+100 POIN)`;
+                subtitle.textContent = `Kunci Jawaban: ${qData.correct}. Soal ini telah dikunci dan siap lanjut ke soal berikutnya.`;
+
+                const nextLabel = qIndex === QUESTIONS_BANK.length - 1 ? 'LIHAT HASIL AKHIR' : 'SOAL BERIKUTNYA';
+                actions.innerHTML = `
+                    <button onclick="toggleExplanation()" class="btn-touch bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-400/50 font-bold text-xs px-3.5 py-2 rounded-xl">
+                        <i class="fas fa-lightbulb mr-1"></i> ${qState.showExplanation ? 'Sembunyikan Pembahasan' : 'Tampilkan Pembahasan'}
+                    </button>
+                    <button onclick="teacherNextQuestion()" class="btn-touch bg-amber-400 hover:bg-amber-300 text-slate-950 font-game text-sm px-5 py-2 rounded-xl border border-white shadow">
+                        ${nextLabel} <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                `;
+            } else {
+                // KONDISI B: Semua kelompok yang menjawab salah
+                banner.className = 'w-full mb-2 px-4 py-2 rounded-2xl border-2 bg-rose-950/95 border-rose-400 text-rose-100 flex items-center justify-between gap-4 shadow-xl shrink-0 z-10';
+                icon.className = 'fas fa-rotate-right text-2xl text-amber-300';
+                title.textContent = 'BELUM ADA JAWABAN BENAR! COBA LAGI';
+                subtitle.textContent = 'Tidak ada pengurangan poin. Soal tetap terbuka! Tekan tombol COBA LAGI agar kelima kelompok dapat menjawab kembali.';
+
+                actions.innerHTML = `
+                    <button onclick="toggleExplanation()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-400/50 font-bold text-xs px-3.5 py-2 rounded-xl">
+                        <i class="fas fa-eye mr-1"></i> ${qState.showExplanation ? 'Sembunyikan Pembahasan' : 'Tampilkan Pembahasan'}
+                    </button>
+                    <button onclick="teacherRetrySameQuestion()" class="btn-touch bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-game text-sm px-6 py-2 rounded-xl border-2 border-white shadow-lg animate-pulse">
+                        <i class="fas fa-redo mr-1.5"></i> COBA LAGI
+                    </button>
+                `;
+            }
+        }
+
+        function renderFiveTeamPanels(qData, qState) {
+            const container = document.getElementById('teams-panel-container');
+            const letters = ['A', 'B', 'C', 'D'];
+            const hasEval = Boolean(qState.lastEvaluation);
+
+            container.innerHTML = gameState.teams.map((team, teamIdx) => {
+                const theme = TEAM_THEMES[teamIdx];
+                const currentChoice = qState.currentChoices[teamIdx];
+                const hasChosen = currentChoice !== null;
+
+                // Status & lencana untuk setiap panel kelompok
+                let statusBadgeHtml = '';
+                let panelGlowClass = '';
+
+                if (hasEval) {
+                    const outcome = qState.lastEvaluation.outcomes[teamIdx];
+                    const evalChoice = qState.lastEvaluation.choices[teamIdx];
+
+                    if (outcome === 'CORRECT') {
+                        statusBadgeHtml = `
+                            <div class="w-full bg-emerald-500 text-slate-950 font-game text-xs py-1.5 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1.5">
+                                <i class="fas fa-check-circle text-sm"></i> BENAR! (+100 POIN)
+                            </div>
+                        `;
+                        panelGlowClass = 'ring-4 ring-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.45)]';
+                    } else if (outcome === 'WRONG') {
+                        statusBadgeHtml = `
+                            <div class="w-full bg-rose-600 text-white font-game text-xs py-1.5 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1.5">
+                                <i class="fas fa-times-circle text-sm"></i>PILIHAN ${evalChoice} — SALAH (0)
+                            </div>
+                        `;
+                    } else {
+                        statusBadgeHtml = `
+                            <div class="w-full bg-slate-700 text-slate-200 font-game text-xs py-1.5 px-2 rounded-xl text-center flex items-center justify-center gap-1.5">
+                                <i class="fas fa-minus-circle text-sm"></i> BELUM MENJAWAB (0)
+                            </div>
+                        `;
+                    }
+                } else if (hasChosen) {
+                    statusBadgeHtml = `
+                        <div class="w-full bg-amber-400 text-slate-950 font-game text-xs py-1.5 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1.5 animate-LockGlow">
+                            <i class="fas fa-lock text-xs"></i> SUDAH MENJAWAB: PILIHAN ${currentChoice}
+                        </div>
+                    `;
+                } else {
+                    statusBadgeHtml = `
+                        <div class="w-full bg-slate-800/90 border border-slate-600 text-slate-300 font-extrabold text-xs py-1.5 px-2 rounded-xl text-center flex items-center justify-center gap-1.5">
+                            <i class="fas fa-hand-point-up text-amber-400 animate-bounce"></i> SENTUH A, B, C, ATAU D
+                        </div>
+                    `;
+                }
+
+                // Render Keempat Tombol A, B, C, D berukuran besar
+                const buttonsGridHtml = letters.map(letter => {
+                    const isSelectedByTeam = currentChoice === letter;
+                    const isDisabled = qState.locked || hasChosen || hasEval || qState.status !== 'BABAK MENJAWAB';
+
+                    let btnClass = '';
+                    let indicatorIcon = '';
+
+                    if (hasEval) {
+                        const evalChoice = qState.lastEvaluation.choices[teamIdx];
+                        const outcome = qState.lastEvaluation.outcomes[teamIdx];
+
+                        if (evalChoice === letter) {
+                            if (outcome === 'CORRECT') {
+                                btnClass = 'bg-emerald-500 text-slate-950 border-white ring-4 ring-emerald-300 scale-105';
+                                indicatorIcon = '<i class="fas fa-check text-base ml-1"></i>';
+                            } else {
+                                btnClass = 'bg-rose-600 text-white border-rose-200 opacity-95';
+                                indicatorIcon = '<i class="fas fa-xmark text-base ml-1"></i>';
+                            }
+                        } else if (qState.locked && qData.correct === letter) {
+                            // Tampilkan indikator kunci jawaban halus hanya ketika soal sudah terkunci
+                            btnClass = 'bg-emerald-950/90 text-emerald-300 border-emerald-400/80';
+                        } else {
+                            btnClass = 'bg-slate-800/50 text-slate-500 border-slate-700 opacity-50';
+                        }
+                    } else if (hasChosen) {
+                        if (isSelectedByTeam) {
+                            // Tampilkan pilihan yang telah dipilih tanpa memberitahu benar/salah
+                            btnClass = 'bg-amber-400 text-slate-950 border-white ring-4 ring-amber-300/70 scale-[1.03]';
+                            indicatorIcon = '<i class="fas fa-lock text-sm ml-1"></i>';
+                        } else {
+                            btnClass = 'bg-slate-800/50 text-slate-500 border-slate-700/60 opacity-45';
+                        }
+                    } else {
+                        // Tombol Aktif Siap Disentuh Siswa
+                        btnClass = theme.btnReady;
+                    }
+
+                    return `
+                        <button
+                            type="button"
+                            ${isDisabled ? 'disabled' : ''}
+                            onclick="selectTeamAnswer(${teamIdx}, '${letter}')"
+                            class="ans-btn w-full h-full rounded-2xl border-2 font-game text-3xl xl:text-4xl flex items-center justify-center select-none ${btnClass}"
+                        >
+                            <span>${letter}</span>${indicatorIcon}
+                        </button>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="h-full bg-gradient-to-b ${theme.bgPanel} border-2 ${theme.borderPanel} rounded-3xl p-3 flex flex-col justify-between shadow-2xl transition-all ${panelGlowClass}">
+                        <!-- Header Panel Kelompok: Nama & Skor -->
+                        <div class="flex items-center justify-between gap-2 pb-1.5 border-b border-white/10 shrink-0">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="${theme.headerBg} font-game text-xs px-2.5 py-1 rounded-lg uppercase tracking-wider shrink-0 shadow">
+                                    K${teamIdx + 1}
+                                </span>
+                                <h3 class="font-game text-base xl:text-lg text-white truncate" title="${escapeHtml(team.name)}">
+                                    ${escapeHtml(team.name)}
+                                </h3>
+                            </div>
+                            <div class="bg-slate-950/90 border border-white/15 px-3 py-1 rounded-xl text-right shrink-0">
+                                <span class="font-game text-lg xl:text-xl ${theme.badgeText}">${team.score}</span>
+                                <span class="text-[10px] font-extrabold text-slate-400 block -mt-1">POIN</span>
+                            </div>
+                        </div>
+
+                        <!-- Grid 2x2 Tombol Pilihan A, B, C, D Berukuran Besar -->
+                        <div class="grid grid-cols-2 grid-rows-2 gap-2.5 my-2 flex-1 min-h-0">
+                            ${buttonsGridHtml}
+                        </div>
+
+                        <!-- Bar Status Jawaban Kelompok -->
+                        <div class="shrink-0">
+                            ${statusBadgeHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /***********************************************************************
+         * PENGATURAN KELOMPOK, PAPAN SKOR & HALAMAN PEMBUKA
+         ***********************************************************************/
+        function renderHomeTeamBadges() {
+            const container = document.getElementById('home-team-badges');
+            if (!container) return;
+            container.innerHTML = gameState.teams.map((team, idx) => {
+                const theme = TEAM_THEMES[idx];
+                return `
+                    <div class="bg-slate-900/90 border-2 ${theme.borderPanel} rounded-2xl p-3 text-center shadow-xl">
+                        <div class="${theme.headerBg} text-xs font-game py-1 px-2 rounded-lg mb-1.5 inline-block">
+                            WARNA ${theme.colorName.toUpperCase()}
+                        </div>
+                        <div class="font-game text-lg text-white truncate">${escapeHtml(team.name)}</div>
+                        <div class="text-xs font-bold text-slate-400 mt-0.5">Skor: ${team.score} Poin</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderSettingsInputs() {
+            const container = document.getElementById('settings-team-inputs');
+            if (!container) return;
+            container.innerHTML = gameState.teams.map((team, idx) => {
+                const theme = TEAM_THEMES[idx];
+                return `
+                    <div class="flex items-center gap-2.5">
+                        <span class="${theme.headerBg} font-game text-xs w-28 py-2.5 rounded-xl text-center shrink-0">
+                            KELOMPOK ${idx + 1}
+                        </span>
+                        <input
+                            type="text"
+                            id="input-team-name-${idx}"
+                            value="${escapeHtml(team.name)}"
+                            maxlength="22"
+                            placeholder="Nama Kelompok ${idx + 1}"
+                            class="w-full bg-slate-800 border-2 border-slate-600 focus:border-amber-400 rounded-xl px-3.5 py-2 text-white font-bold text-sm outline-none"
+                        />
+                    </div>
+                `;
+            }).join('');
+
+            highlightSelectedTimerButton(gameState.timerDuration);
+        }
+
+        let tempTimerSelection = gameState.timerDuration;
+
+        function selectTimerSetting(seconds) {
+            tempTimerSelection = seconds;
+            highlightSelectedTimerButton(seconds);
+        }
+
+        function highlightSelectedTimerButton(seconds) {
+            tempTimerSelection = seconds;
+            document.querySelectorAll('.timer-opt-btn').forEach(btn => {
+                const btnSec = parseInt(btn.getAttribute('data-sec'), 10);
+                if (btnSec === seconds) {
+                    btn.className = 'timer-opt-btn py-3 rounded-xl font-game text-base border-2 bg-amber-400 text-slate-950 border-white shadow-lg';
+                } else {
+                    btn.className = 'timer-opt-btn py-3 rounded-xl font-game text-base border-2 bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-500';
+                }
+            });
+        }
+
+        function resetDefaultTeamNames() {
+            TEAM_THEMES.forEach((t, idx) => {
+                const inp = document.getElementById(`input-team-name-${idx}`);
+                if (inp) inp.value = t.defaultName;
+            });
+        }
+
+        function saveSettings() {
+            playTone('select');
+            gameState.teams.forEach((team, idx) => {
+                const inp = document.getElementById(`input-team-name-${idx}`);
+                if (inp && inp.value.trim() !== '') {
+                    team.name = inp.value.trim();
+                } else {
+                    team.name = TEAM_THEMES[idx].defaultName;
+                }
+            });
+            gameState.timerDuration = tempTimerSelection;
+            gameState.timeLeft = gameState.timerDuration;
+
+            saveStateToStorage();
+            renderHomeTeamBadges();
+            if (gameState.screen === 'GAME') {
+                renderGameArena();
+                updateTimerDisplayUI();
+            }
+            closeModal('modal-settings');
+        }
+
+        /***********************************************************************
+         * PERINGKAT KELOMPOK & HALAMAN HASIL AKHIR
+         ***********************************************************************/
+        function getSortedTeamsWithRank() {
+            // Urutkan dari skor tertinggi ke terendah, lalu jawaban benar terbanyak
+            const cloned = gameState.teams.map(t => ({ ...t }));
+            cloned.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return b.correctCount - a.correctCount;
+            });
+
+            // Berikan peringkat (mendukung peringkat bersama jika skor sama)
+            let currentRank = 1;
+            cloned.forEach((team, idx) => {
+                if (idx > 0 && team.score < cloned[idx - 1].score) {
+                    currentRank = idx + 1;
+                }
+                team.rank = currentRank;
+            });
+            return cloned;
+        }
+
+        function renderModalScoreboard() {
+            const tbody = document.getElementById('modal-scoreboard-body');
+            if (!tbody) return;
+
+            const ranked = getSortedTeamsWithRank();
+            tbody.innerHTML = ranked.map(team => {
+                const theme = TEAM_THEMES[team.id];
+                const isTop = team.rank === 1 && team.score > 0;
+                return `
+                    <tr class="${isTop ? 'bg-amber-500/10' : 'bg-slate-900/60'}">
+                        <td class="py-3 px-4 text-center font-game text-lg">
+                            ${isTop ? '👑 #1' : `#${team.rank}`}
+                        </td>
+                        <td class="py-3 px-4 flex items-center gap-2.5">
+                            <span class="w-3.5 h-3.5 rounded-full ${theme.headerBg}"></span>
+                            <span class="text-white font-game text-lg">${escapeHtml(team.name)}</span>
+                        </td>
+                        <td class="py-3 px-4 text-center font-game text-xl text-amber-400">${team.score}</td>
+                        <td class="py-3 px-4 text-center text-emerald-400">${team.correctCount}</td>
+                        <td class="py-3 px-4 text-center text-rose-400">${team.wrongCount}</td>
+                        <td class="py-3 px-4 text-center text-slate-400">${team.unansweredCount}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function finishGameEarly() {
+            closeModal('modal-scoreboard');
+            showScreen('FINAL');
+            renderFinalScreen();
+        }
+
+        function renderFinalScreen() {
+            playTone('victory');
+            startConfetti();
+
+            const ranked = getSortedTeamsWithRank();
+            const highestScore = ranked[0].score;
+            const winners = ranked.filter(t => t.score === highestScore && highestScore > 0);
+
+            // 1. Render Banner Pemenang (Mendukung Pemenang Tunggal maupun Pemenang Bersama)
+            const winnerBanner = document.getElementById('final-winner-banner');
+            if (winners.length === 0) {
+                winnerBanner.innerHTML = `
+                    <div class="text-amber-300 font-game text-xl mb-1">PERMAINAN SELESAI</div>
+                    <div class="text-2xl font-extrabold text-white">Belum ada poin yang tercatat pada permainan ini.</div>
+                `;
+            } else if (winners.length === 1) {
+                winnerBanner.innerHTML = `
+                    <div class="text-amber-300 font-extrabold text-sm uppercase tracking-widest mb-1">🎉 SELAMAT KEPADA KELOMPOK PEMENANG UTAMA 🎉</div>
+                    <div class="font-game text-4xl md:text-5xl text-white drop-shadow my-1">👑 ${escapeHtml(winners[0].name)}</div>
+                    <div class="text-amber-200 font-bold text-lg">Total Skor Tertinggi: <span class="font-game text-2xl text-amber-300">${highestScore} POIN</span></div>
+                `;
+            } else {
+                const winnerNames = winners.map(w => escapeHtml(w.name)).join(' & ');
+                winnerBanner.innerHTML = `
+                    <div class="text-amber-300 font-extrabold text-sm uppercase tracking-widest mb-1">🎉 SELAMAT KEPADA PEMENANG BERSAMA 🎉</div>
+                    <div class="font-game text-3xl md:text-4xl text-white drop-shadow my-1">👑 ${winnerNames}</div>
+                    <div class="text-amber-200 font-bold text-lg">Berbagi Peringkat Pertama dengan Skor: <span class="font-game text-2xl text-amber-300">${highestScore} POIN</span></div>
+                `;
+            }
+
+            // 2. Render Tabel Leaderboard Lengkap
+            const tbody = document.getElementById('final-leaderboard-body');
+            tbody.innerHTML = ranked.map(team => {
+                const theme = TEAM_THEMES[team.id];
+                const totalGivenAnswers = team.correctCount + team.wrongCount;
+                const accuracyPct = totalGivenAnswers > 0
+                    ? Math.round((team.correctCount / totalGivenAnswers) * 100)
+                    : 0;
+                const isWinner = team.score === highestScore && highestScore > 0;
+
+                return `
+                    <tr class="${isWinner ? 'bg-amber-500/15' : 'hover:bg-slate-800/60'} transition-colors">
+                        <td class="py-4 px-5 text-center font-game text-2xl ${isWinner ? 'text-amber-300' : 'text-slate-300'}">
+                            ${isWinner ? '🏆 #1' : `#${team.rank}`}
+                        </td>
+                        <td class="py-4 px-5">
+                            <div class="flex items-center gap-3">
+                                <span class="${theme.headerBg} w-4 h-4 rounded-full shrink-0"></span>
+                                <span class="font-game text-xl text-white">${escapeHtml(team.name)}</span>
+                                ${isWinner ? '<span class="bg-amber-400 text-slate-950 font-game text-xs px-2.5 py-0.5 rounded-full">JUARA</span>' : ''}
+                            </div>
+                        </td>
+                        <td class="py-4 px-5 text-center font-game text-2xl text-amber-400">${team.score}</td>
+                        <td class="py-4 px-5 text-center text-emerald-400 text-lg">${team.correctCount}</td>
+                        <td class="py-4 px-5 text-center text-rose-400 text-lg">${team.wrongCount}</td>
+                        <td class="py-4 px-5 text-center text-slate-400 text-lg">${team.unansweredCount}</td>
+                        <td class="py-4 px-5 text-center">
+                            <span class="bg-sky-500/20 border border-sky-400/50 text-sky-300 px-3 py-1 rounded-xl font-game text-base">
+                                ${accuracyPct}%
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderDetailHistoryModal() {
+            const container = document.getElementById('detail-history-content');
+            if (!container) return;
+
+            container.innerHTML = QUESTIONS_BANK.map((qData, idx) => {
+                const qState = gameState.questionStates[idx];
+                const evalInfo = qState.lastEvaluation;
+
+                const teamBadges = gameState.teams.map((team, tIdx) => {
+                    const theme = TEAM_THEMES[tIdx];
+                    if (!evalInfo) {
+                        return `<span class="bg-slate-800 text-slate-400 border border-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold">${escapeHtml(team.name)}: -</span>`;
+                    }
+                    const choice = evalInfo.choices[tIdx] || '-';
+                    const outcome = evalInfo.outcomes[tIdx];
+                    if (outcome === 'CORRECT') {
+                        return `<span class="bg-emerald-900/90 text-emerald-200 border border-emerald-400 px-2.5 py-1 rounded-lg text-xs font-bold">✅ ${escapeHtml(team.name)}: ${choice} (+100)</span>`;
+                    } else if (outcome === 'WRONG') {
+                        return `<span class="bg-rose-900/80 text-rose-200 border border-rose-500 px-2.5 py-1 rounded-lg text-xs font-bold">❌ ${escapeHtml(team.name)}: ${choice} (0)</span>`;
+                    } else {
+                        return `<span class="bg-slate-800 text-slate-300 border border-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold">⚪ ${escapeHtml(team.name)}: Kosong (0)</span>`;
+                    }
+                }).join('');
+
+                return `
+                    <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4">
+                        <div class="flex justify-between items-start gap-4 mb-2">
+                            <div class="font-bold text-white text-base">
+                                <span class="text-amber-400 font-game mr-1.5">SOAL ${idx + 1}:</span> ${escapeHtml(qData.question)}
+                            </div>
+                            <span class="bg-emerald-500/20 border border-emerald-400 text-emerald-300 font-game text-xs px-3 py-1 rounded-lg shrink-0">
+                                Kunci: ${qData.correct}. ${escapeHtml(qData.options[qData.correct])}
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            ${teamBadges}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function printQuizResults() {
+            const ranked = getSortedTeamsWithRank();
+            const printArea = document.getElementById('print-area');
+            const dateStr = new Date().toLocaleDateString('id-ID', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            const rowsHtml = ranked.map(team => {
+                const totalGiven = team.correctCount + team.wrongCount;
+                const acc = totalGiven > 0 ? Math.round((team.correctCount / totalGiven) * 100) : 0;
+                return `
+                    <tr>
+                        <td style="border:1px solid #333; padding:8px; text-align:center;">#${team.rank}</td>
+                        <td style="border:1px solid #333; padding:8px; font-weight:bold;">${escapeHtml(team.name)}</td>
+                        <td style="border:1px solid #333; padding:8px; text-align:center; font-weight:bold;">${team.score}</td>
+                        <td style="border:1px solid #333; padding:8px; text-align:center;">${team.correctCount}</td>
+                        <td style="border:1px solid #333; padding:8px; text-align:center;">${team.wrongCount}</td>
+                        <td style="border:1px solid #333; padding:8px; text-align:center;">${team.unansweredCount}</td>
+                        <td style="border:1px solid #333; padding:8px; text-align:center;">${acc}%</td>
+                    </tr>
+                `;
+            }).join('');
+
+            printArea.innerHTML = `
+                <div style="font-family: sans-serif; max-width: 800px; margin: 0 auto;">
+                    <h1 style="text-align:center; margin-bottom: 4px;">HASIL AKHIR ARENA KUIS REBUTAN — 5 KELOMPOK</h1>
+                    <p style="text-align:center; margin-top:0; color:#555;">SD Kelas 6 • Materi Norma & Kesepakatan Kelas • ${dateStr}</p>
+                    <table style="width:100%; border-collapse:collapse; margin-top: 20px;">
+                        <thead>
+                            <tr style="background:#eee;">
+                                <th style="border:1px solid #333; padding:8px;">Peringkat</th>
+                                <th style="border:1px solid #333; padding:8px; text-align:left;">Nama Kelompok</th>
+                                <th style="border:1px solid #333; padding:8px;">Total Poin</th>
+                                <th style="border:1px solid #333; padding:8px;">Benar</th>
+                                <th style="border:1px solid #333; padding:8px;">Salah</th>
+                                <th style="border:1px solid #333; padding:8px;">Tidak Dijawab</th>
+                                <th style="border:1px solid #333; padding:8px;">Akurasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            window.print();
+        }
+
+        // Main Lagi dengan mempertahankan nama-nama kelompok yang sudah diatur guru
+        function playAgainSameTeams() {
+            playTone('select');
+            const savedNames = gameState.teams.map(t => t.name);
+            const savedTimer = gameState.timerDuration;
+
+            gameState = createInitialState();
+            gameState.timerDuration = savedTimer;
+            gameState.timeLeft = savedTimer;
+            gameState.teams.forEach((t, idx) => {
+                t.name = savedNames[idx];
+            });
+
+            saveStateToStorage();
+            showScreen('GAME');
+            startOrResumeCurrentQuestion();
+        }
+
+        // Reset Permainan Sepenuhnya setelah konfirmasi
+        function confirmFullResetGame() {
+            playTone('select');
+            stopRoundTimer();
+            localStorage.removeItem(STORAGE_KEY);
+            gameState = createInitialState();
+            saveStateToStorage();
+            closeModal('modal-confirm-reset');
+            renderHomeTeamBadges();
+            renderSettingsInputs();
+            showScreen('HOME');
+        }
+
+        /***********************************************************************
+         * MODAL & FULLSCREEN HELPERS
+         ***********************************************************************/
+        function openModal(modalId) {
+            playTone('select');
+            if (modalId === 'modal-settings') {
+                renderSettingsInputs();
+            } else if (modalId === 'modal-scoreboard') {
+                renderModalScoreboard();
+            } else if (modalId === 'modal-detail-history') {
+                renderDetailHistoryModal();
+            }
+            const el = document.getElementById(modalId);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            const el = document.getElementById(modalId);
+            if (el) el.classList.add('hidden');
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                }
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        /***********************************************************************
+         * ANIMASI KONFETI (UNTUK HALAMAN HASIL AKHIR)
+         ***********************************************************************/
+        let confettiAnimId = null;
+        let confettiParticles = [];
+
+        function startConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            if (!canvas) return;
+            canvas.classList.remove('hidden');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const colors = ['#f43f5e', '#0ea5e9', '#10b981', '#f59e0b', '#a855f7', '#fde047'];
+            confettiParticles = Array.from({ length: 110 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                w: Math.random() * 10 + 6,
+                h: Math.random() * 6 + 4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                vy: Math.random() * 3 + 2,
+                vx: Math.random() * 2 - 1,
+                angle: Math.random() * 360,
+                vAngle: Math.random() * 6 - 3
+            }));
+
+            function renderFrame() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                confettiParticles.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.angle += p.vAngle;
+                    if (p.y > canvas.height) {
+                        p.y = -20;
+                        p.x = Math.random() * canvas.width;
+                    }
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.angle * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    ctx.restore();
+                });
+                confettiAnimId = requestAnimationFrame(renderFrame);
+            }
+            if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+            renderFrame();
+        }
+
+        function stopConfetti() {
+            if (confettiAnimId) {
+                cancelAnimationFrame(confettiAnimId);
+                confettiAnimId = null;
+            }
+            const canvas = document.getElementById('confetti-canvas');
+            if (canvas) canvas.classList.add('hidden');
+        }
+
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confetti-canvas');
+            if (canvas && !canvas.classList.contains('hidden')) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+
+        // Jalankan aplikasi saat halaman siap
+        window.onload = initApp;
+    </script>
+</body>
+</html>
