@@ -183,79 +183,82 @@
     <!-- ======================================================================= -->
     <!-- 2. LAYAR UTAMA PERMAINAN (GAME ARENA 16:9)                              -->
     <!-- ======================================================================= -->
-    <main id="screen-game" class="hidden w-screen h-screen flex flex-col justify-between p-2.5 gap-2 overflow-hidden no-print">
+    <main id="screen-game" class="hidden w-screen h-screen flex flex-col justify-between p-2 md:p-3 gap-2 overflow-hidden no-print">
         
         <!-- ==================== BAGIAN ATAS: INFO SOAL, KONTROL GURU & SKOR RINGKAS ==================== -->
-        <header class="w-full bg-slate-900/95 border-2 border-slate-700/80 rounded-2xl px-3.5 py-2 flex items-center justify-between gap-3 shadow-xl shrink-0">
+        <header class="w-full bg-slate-900/95 border-2 border-slate-700/80 rounded-2xl px-3 py-2 flex flex-col gap-2 shadow-xl shrink-0">
             
-            <!-- Kiri: Nomor Soal, Status & Indikator Progres -->
-            <div class="flex items-center gap-3 shrink-0">
-                <button onclick="goHomeScreen()" title="Kembali ke Beranda" class="btn-touch bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 w-11 h-11 rounded-xl flex items-center justify-center text-lg shadow">
-                    <i class="fas fa-home"></i>
-                </button>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span id="question-counter" class="font-game text-xl text-amber-400 tracking-wide">SOAL 1 / 10</span>
-                        <span id="question-state-badge" class="px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                            BABAK MENJAWAB
-                        </span>
+            <!-- BARIS 1: Info Soal & Progres (Kiri) + Kontrol Guru (Kanan) -->
+            <div class="w-full flex flex-wrap items-center justify-between gap-2">
+                <!-- Kiri: Nomor Soal, Status & Indikator Progres -->
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <button onclick="goHomeScreen()" title="Kembali ke Beranda" class="btn-touch bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 w-10 h-10 rounded-xl flex items-center justify-center text-base shadow shrink-0">
+                        <i class="fas fa-home"></i>
+                    </button>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="question-counter" class="font-game text-lg md:text-xl text-amber-400 tracking-wide whitespace-nowrap">SOAL 1 / 10</span>
+                            <span id="question-state-badge" class="px-2 py-0.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 whitespace-nowrap">
+                                BABAK MENJAWAB
+                            </span>
+                        </div>
+                        <!-- Indikator Progres 10 Soal -->
+                        <div id="progress-dots" class="flex items-center gap-1 mt-1">
+                            <!-- Dots diisi via JS -->
+                        </div>
                     </div>
-                    <!-- Indikator Progres 10 Soal -->
-                    <div id="progress-dots" class="flex items-center gap-1.5 mt-1">
-                        <!-- Dots diisi via JS -->
+                </div>
+
+                <!-- Kanan: Timer & Kontrol Utama Guru (Aman di Bagian Atas) -->
+                <div class="flex flex-wrap items-center justify-end gap-1.5">
+                    <!-- Kotak Timer -->
+                    <div id="timer-box" class="flex items-center gap-1.5 bg-slate-950 border-2 border-slate-700 px-2.5 py-1 rounded-xl shrink-0">
+                        <i class="fas fa-stopwatch text-amber-400 text-base"></i>
+                        <span id="timer-display" class="font-game text-xl text-white min-w-[2.5rem] text-center">20s</span>
                     </div>
+
+                    <!-- Tombol Tambah Waktu -->
+                    <button id="btn-add-time" onclick="teacherAddTime(15)" class="btn-touch bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs px-2.5 py-2 rounded-xl border border-sky-400 shadow flex items-center gap-1 shrink-0" title="Tambah Waktu +15 Detik">
+                        <i class="fas fa-plus-circle"></i> <span>+15d</span>
+                    </button>
+
+                    <!-- Tombol Reset Babak -->
+                    <button id="btn-reset-round" onclick="teacherResetRound()" class="btn-touch bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs px-2.5 py-2 rounded-xl border border-amber-400 shadow flex items-center gap-1 shrink-0" title="Hapus Jawaban Babak Ini Saja">
+                        <i class="fas fa-rotate-left"></i> <span>Reset Babak</span>
+                    </button>
+
+                    <!-- Tombol Utama Guru: KUNCI JAWABAN & TAMPILKAN HASIL -->
+                    <button id="btn-evaluate" onclick="teacherTriggerEvaluate()" class="btn-touch bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-game text-xs md:text-sm px-3.5 py-2 rounded-xl border-2 border-emerald-200 shadow-lg flex items-center gap-1.5 shrink-0">
+                        <i class="fas fa-check-double"></i> <span>KUNCI & TAMPILKAN HASIL</span>
+                    </button>
+
+                    <!-- Tombol Soal Berikutnya (Muncul/Aktif saat soal selesai) -->
+                    <button id="btn-next-question" onclick="teacherNextQuestion()" class="hidden btn-touch bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-game text-xs md:text-sm px-3.5 py-2 rounded-xl border-2 border-yellow-100 shadow-lg flex items-center gap-1.5 shrink-0">
+                        <span>SOAL BERIKUTNYA</span> <i class="fas fa-arrow-right"></i>
+                    </button>
+
+                    <!-- Menu Kontrol Guru Lainnya -->
+                    <button onclick="openModal('modal-scoreboard')" class="btn-touch bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-xs px-2.5 py-2 rounded-xl border border-indigo-400 shadow flex items-center gap-1 shrink-0" title="Lihat Papan Skor Lengkap">
+                        <i class="fas fa-ranking-star"></i> <span>Skor</span>
+                    </button>
+
+                    <button onclick="teacherSkipQuestion()" id="btn-skip-question" class="btn-touch bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-2.5 py-2 rounded-xl border border-slate-600 shadow flex items-center gap-1 shrink-0" title="Lewati Soal">
+                        <i class="fas fa-forward-step"></i> <span>Lewati</span>
+                    </button>
+
+                    <button onclick="openModal('modal-confirm-reset')" class="btn-touch bg-rose-900/80 hover:bg-rose-700 text-rose-200 font-bold text-xs px-2.5 py-2 rounded-xl border border-rose-500/50 shadow shrink-0" title="Reset Seluruh Permainan">
+                        <i class="fas fa-trash-can"></i>
+                    </button>
+
+                    <button onclick="toggleFullScreen()" class="btn-touch bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-2.5 py-2 rounded-xl border border-slate-600 shadow shrink-0" title="Layar Penuh">
+                        <i class="fas fa-expand"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- Tengah: Papan Skor Ringkas 5 Kelompok -->
-            <div id="top-mini-scoreboard" class="flex items-center gap-2 overflow-x-auto py-0.5">
+            <!-- BARIS 2: Papan Skor Ringkas 5 Kelompok (Grid 5 Kolom Proporsional & Anti-Bertumpuk) -->
+            <div id="top-mini-scoreboard" class="w-full grid grid-cols-5 gap-2 pt-1.5 border-t border-slate-800">
                 <!-- Diisi via JS -->
-            </div>
-
-            <!-- Kanan: Timer & Kontrol Utama Guru (Aman di Bagian Atas) -->
-            <div class="flex items-center gap-2 shrink-0">
-                <!-- Kotak Timer -->
-                <div id="timer-box" class="flex items-center gap-2 bg-slate-950 border-2 border-slate-700 px-3 py-1.5 rounded-xl">
-                    <i class="fas fa-stopwatch text-amber-400 text-lg"></i>
-                    <span id="timer-display" class="font-game text-2xl text-white w-10 text-center">20s</span>
-                </div>
-
-                <!-- Tombol Tambah Waktu -->
-                <button id="btn-add-time" onclick="teacherAddTime(15)" class="btn-touch bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs px-3 py-2.5 rounded-xl border border-sky-400 shadow flex items-center gap-1.5" title="Tambah Waktu +15 Detik">
-                    <i class="fas fa-plus-circle"></i> +15d
-                </button>
-
-                <!-- Tombol Reset Babak -->
-                <button id="btn-reset-round" onclick="teacherResetRound()" class="btn-touch bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs px-3 py-2.5 rounded-xl border border-amber-400 shadow flex items-center gap-1.5" title="Hapus Jawaban Babak Ini Saja">
-                    <i class="fas fa-rotate-left"></i> Reset Babak
-                </button>
-
-                <!-- Tombol Utama Guru: KUNCI JAWABAN & TAMPILKAN HASIL -->
-                <button id="btn-evaluate" onclick="teacherTriggerEvaluate()" class="btn-touch bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-game text-sm px-4 py-2.5 rounded-xl border-2 border-emerald-200 shadow-lg flex items-center gap-2">
-                    <i class="fas fa-check-double text-base"></i> KUNCI & TAMPILKAN HASIL
-                </button>
-
-                <!-- Tombol Soal Berikutnya (Muncul/Aktif saat soal selesai) -->
-                <button id="btn-next-question" onclick="teacherNextQuestion()" class="hidden btn-touch bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-game text-sm px-4 py-2.5 rounded-xl border-2 border-yellow-100 shadow-lg flex items-center gap-2 animate-bounce">
-                    <span>SOAL BERIKUTNYA</span> <i class="fas fa-arrow-right text-base"></i>
-                </button>
-
-                <!-- Menu Kontrol Guru Lainnya -->
-                <button onclick="openModal('modal-scoreboard')" class="btn-touch bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-xs px-3 py-2.5 rounded-xl border border-indigo-400 shadow flex items-center gap-1.5" title="Lihat Papan Skor Lengkap">
-                    <i class="fas fa-ranking-star text-sm"></i> Skor
-                </button>
-
-                <button onclick="teacherSkipQuestion()" id="btn-skip-question" class="btn-touch bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-3 py-2.5 rounded-xl border border-slate-600 shadow flex items-center gap-1" title="Lewati Soal">
-                    <i class="fas fa-forward-step"></i> Lewati
-                </button>
-
-                <button onclick="openModal('modal-confirm-reset')" class="btn-touch bg-rose-900/80 hover:bg-rose-700 text-rose-200 font-bold text-xs px-3 py-2.5 rounded-xl border border-rose-500/50 shadow" title="Reset Seluruh Permainan">
-                    <i class="fas fa-trash-can"></i>
-                </button>
-
-                <button onclick="toggleFullScreen()" class="btn-touch bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-3 py-2.5 rounded-xl border border-slate-600 shadow" title="Layar Penuh">
-                    <i class="fas fa-expand"></i>
-                </button>
             </div>
         </header>
 
@@ -1414,10 +1417,15 @@
             miniScoreboard.innerHTML = gameState.teams.map((team, idx) => {
                 const theme = TEAM_THEMES[idx];
                 return `
-                    <div class="flex items-center gap-2 bg-slate-950/90 border ${theme.borderPanel} px-2.5 py-1 rounded-xl shrink-0">
-                        <span class="w-2.5 h-2.5 rounded-full ${theme.headerBg}"></span>
-                        <span class="text-xs font-extrabold text-slate-200 max-w-[95px] truncate">${escapeHtml(team.name)}</span>
-                        <span class="font-game text-sm ${theme.badgeText} bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-800">${team.score}</span>
+                    <div class="flex items-center justify-between gap-1.5 bg-slate-950/90 border-2 ${theme.borderPanel} px-2.5 py-1 rounded-xl min-w-0 shadow">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="${theme.headerBg} font-game text-[11px] px-1.5 py-0.5 rounded-md shrink-0 leading-none">K${idx + 1}</span>
+                            <span class="text-xs md:text-sm font-extrabold text-white truncate">${escapeHtml(team.name)}</span>
+                        </div>
+                        <div class="flex items-baseline gap-1 bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-800 shrink-0">
+                            <span class="font-game text-sm md:text-base ${theme.badgeText} leading-none">${team.score}</span>
+                            <span class="text-[10px] font-bold text-slate-400 hidden sm:inline leading-none">POIN</span>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -1639,7 +1647,7 @@
                             type="button"
                             ${isDisabled ? 'disabled' : ''}
                             onclick="selectTeamAnswer(${teamIdx}, '${letter}')"
-                            class="ans-btn w-full h-full rounded-2xl border-2 font-game text-3xl xl:text-4xl flex items-center justify-center select-none ${btnClass}"
+                            class="ans-btn w-full h-full rounded-2xl border-2 font-game text-2xl md:text-3xl xl:text-4xl flex items-center justify-center select-none ${btnClass}"
                         >
                             <span>${letter}</span>${indicatorIcon}
                         </button>
@@ -1647,25 +1655,25 @@
                 }).join('');
 
                 return `
-                    <div class="h-full bg-gradient-to-b ${theme.bgPanel} border-2 ${theme.borderPanel} rounded-3xl p-3 flex flex-col justify-between shadow-2xl transition-all ${panelGlowClass}">
-                        <!-- Header Panel Kelompok: Nama & Skor -->
-                        <div class="flex items-center justify-between gap-2 pb-1.5 border-b border-white/10 shrink-0">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <span class="${theme.headerBg} font-game text-xs px-2.5 py-1 rounded-lg uppercase tracking-wider shrink-0 shadow">
+                    <div class="h-full bg-gradient-to-b ${theme.bgPanel} border-2 ${theme.borderPanel} rounded-3xl p-2.5 flex flex-col justify-between shadow-2xl transition-all min-w-0 ${panelGlowClass}">
+                        <!-- Header Panel Kelompok: Nama & Skor Terpisah Rapi Anti-Tumpuk -->
+                        <div class="flex flex-col gap-1 pb-1.5 border-b border-white/15 shrink-0">
+                            <div class="flex items-center justify-between gap-1 min-w-0">
+                                <span class="${theme.headerBg} font-game text-[11px] px-2 py-0.5 rounded-lg uppercase tracking-wider shrink-0 shadow">
                                     K${teamIdx + 1}
                                 </span>
-                                <h3 class="font-game text-base xl:text-lg text-white truncate" title="${escapeHtml(team.name)}">
-                                    ${escapeHtml(team.name)}
-                                </h3>
+                                <div class="bg-slate-950/95 border border-white/20 px-2.5 py-0.5 rounded-xl flex items-baseline gap-1 shrink-0 shadow">
+                                    <span class="font-game text-base md:text-lg xl:text-xl ${theme.badgeText} leading-none">${team.score}</span>
+                                    <span class="text-[10px] font-extrabold text-slate-300 leading-none">POIN</span>
+                                </div>
                             </div>
-                            <div class="bg-slate-950/90 border border-white/15 px-3 py-1 rounded-xl text-right shrink-0">
-                                <span class="font-game text-lg xl:text-xl ${theme.badgeText}">${team.score}</span>
-                                <span class="text-[10px] font-extrabold text-slate-400 block -mt-1">POIN</span>
-                            </div>
+                            <h3 class="font-game text-sm md:text-base text-white truncate text-left leading-tight" title="${escapeHtml(team.name)}">
+                                ${escapeHtml(team.name)}
+                            </h3>
                         </div>
 
                         <!-- Grid 2x2 Tombol Pilihan A, B, C, D Berukuran Besar -->
-                        <div class="grid grid-cols-2 grid-rows-2 gap-2.5 my-2 flex-1 min-h-0">
+                        <div class="grid grid-cols-2 grid-rows-2 gap-2 my-1.5 flex-1 min-h-0">
                             ${buttonsGridHtml}
                         </div>
 
