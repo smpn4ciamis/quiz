@@ -338,13 +338,14 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-800/90 text-slate-300 text-sm uppercase border-b border-slate-700">
-                            <th class="py-3.5 px-5 font-extrabold text-center w-24">Peringkat</th>
-                            <th class="py-3.5 px-5 font-extrabold">Nama Kelompok</th>
-                            <th class="py-3.5 px-5 font-extrabold text-center">Total Poin</th>
-                            <th class="py-3.5 px-5 font-extrabold text-center text-emerald-400">Jawaban Benar</th>
-                            <th class="py-3.5 px-5 font-extrabold text-center text-rose-400">Jawaban Salah</th>
-                            <th class="py-3.5 px-5 font-extrabold text-center text-slate-400">Tidak Dijawab</th>
-                            <th class="py-3.5 px-5 font-extrabold text-center text-sky-300">Akurasi Jawaban</th>
+                            <th class="py-3.5 px-4 font-extrabold text-center w-20">Peringkat</th>
+                            <th class="py-3.5 px-4 font-extrabold">Nama Kelompok</th>
+                            <th class="py-3.5 px-4 font-extrabold text-center">Total Poin</th>
+                            <th class="py-3.5 px-4 font-extrabold text-center text-amber-300"><i class="fas fa-bolt mr-1"></i>Rata-rata Kecepatan</th>
+                            <th class="py-3.5 px-4 font-extrabold text-center text-emerald-400">Benar</th>
+                            <th class="py-3.5 px-4 font-extrabold text-center text-rose-400">Salah</th>
+                            <th class="py-3.5 px-4 font-extrabold text-center text-slate-400">Kosong</th>
+                            <th class="py-3.5 px-4 font-extrabold text-center text-sky-300">Akurasi</th>
                         </tr>
                     </thead>
                     <tbody id="final-leaderboard-body" class="divide-y divide-slate-800 text-base font-bold">
@@ -459,7 +460,7 @@
                         <li>Guru menekan tombol <strong>KUNCI & TAMPILKAN HASIL</strong> untuk memeriksa jawaban seluruh kelompok secara serentak.</li>
                         <li><strong>Ada Kelompok yang Benar:</strong> Setiap kelompok yang menjawab benar mendapat <strong>+100 Poin</strong>, soal otomatis <strong>TERKUNCI</strong>, dan pembahasan ditampilkan.</li>
                         <li><strong>Semua Kelompok Salah:</strong> Tidak ada pengurangan poin (0 poin). Soal <strong>tetap terbuka</strong> dan semua kelompok boleh <strong>COBA LAGI</strong>!</li>
-                        <li><strong>Belum Menjawab:</strong> Tidak dihitung salah (0 poin).</li>
+                        <li><strong>Penentu Juara Saat Skor Sama:</strong> Jika terdapat skor akhir yang sama, kelompok yang <strong>paling cepat menjawab benar</strong> (rata-rata waktu jawab tercepat) otomatis menjadi Juara!</li>
                     </ul>
                 </div>
             </div>
@@ -519,6 +520,7 @@
                             <th class="py-3 px-4 text-center">Peringkat</th>
                             <th class="py-3 px-4">Kelompok</th>
                             <th class="py-3 px-4 text-center">Total Poin</th>
+                            <th class="py-3 px-4 text-center text-amber-300"><i class="fas fa-bolt mr-1"></i>Kecepatan Jawab</th>
                             <th class="py-3 px-4 text-center text-emerald-400">Benar</th>
                             <th class="py-3 px-4 text-center text-rose-400">Salah</th>
                             <th class="py-3 px-4 text-center text-slate-400">Tidak Menjawab</th>
@@ -893,8 +895,9 @@
         /***********************************************************************
          * STATE PERMAINAN & PENYIMPANAN LOCALSTORAGE
          ***********************************************************************/
-        const STORAGE_KEY = 'ARENA_KUIS_REBUTAN_5_KELOMPOK_V1';
+        const STORAGE_KEY = 'ARENA_KUIS_REBUTAN_5_KELOMPOK_V2';
         let timerInterval = null;
+        let roundStartTimestamp = Date.now();
 
         function createInitialState() {
             return {
@@ -908,7 +911,9 @@
                     score: 0,
                     correctCount: 0,
                     wrongCount: 0,
-                    unansweredCount: 0
+                    unansweredCount: 0,
+                    totalCorrectTimeMs: 0, // Akumulasi waktu menjawab untuk jawaban yang BENAR (ms)
+                    totalAnswerTimeMs: 0   // Akumulasi waktu menjawab seluruh soal (ms)
                 })),
                 questionStates: QUESTIONS_BANK.map(q => ({
                     id: q.id,
@@ -919,7 +924,8 @@
                     attempts: 0,
                     showExplanation: false,
                     currentChoices: [null, null, null, null, null], // Pilihan 5 kelompok pada babak aktif
-                    lastEvaluation: null // Menyimpan hasil pemeriksaan babak terakhir { choices: [...], outcomes: [...], anyCorrect: bool }
+                    currentTimesMs: [null, null, null, null, null], // Waktu jawab (ms) 5 kelompok pada babak aktif
+                    lastEvaluation: null // Menyimpan hasil pemeriksaan babak terakhir { choices: [...], timesMs: [...], outcomes: [...], anyCorrect: bool }
                 }))
             };
         }
@@ -940,6 +946,14 @@
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     if (parsed && Array.isArray(parsed.teams) && parsed.teams.length === 5 && Array.isArray(parsed.questionStates)) {
+                        // Pastikan properti kecepatan ada pada data lama
+                        parsed.teams.forEach(t => {
+                            if (typeof t.totalCorrectTimeMs !== 'number') t.totalCorrectTimeMs = 0;
+                            if (typeof t.totalAnswerTimeMs !== 'number') t.totalAnswerTimeMs = 0;
+                        });
+                        parsed.questionStates.forEach(qs => {
+                            if (!Array.isArray(qs.currentTimesMs)) qs.currentTimesMs = [null, null, null, null, null];
+                        });
                         return parsed;
                     }
                 }
@@ -947,6 +961,24 @@
                 console.warn('Gagal memuat state dari localStorage:', e);
             }
             return createInitialState();
+        }
+
+        // Helper format milidetik ke detik (contoh: 2.45 dtk)
+        function formatResponseTime(ms) {
+            if (typeof ms !== 'number' || ms <= 0 || !isFinite(ms)) return '-';
+            return (ms / 1000).toFixed(2) + ' dtk';
+        }
+
+        // Helper mendapatkan rata-rata kecepatan menjawab benar (ms)
+        function getTeamAverageSpeedMs(team) {
+            if (team.correctCount > 0 && team.totalCorrectTimeMs > 0) {
+                return team.totalCorrectTimeMs / team.correctCount;
+            }
+            const totalAnswered = team.correctCount + team.wrongCount;
+            if (totalAnswered > 0 && team.totalAnswerTimeMs > 0) {
+                return team.totalAnswerTimeMs / totalAnswered;
+            }
+            return Infinity;
         }
 
         /***********************************************************************
@@ -1007,6 +1039,7 @@
                 qState.status = 'BABAK MENJAWAB';
                 gameState.timeLeft = gameState.timerDuration;
             }
+            roundStartTimestamp = Date.now();
             renderGameArena();
             if (qState.status === 'BABAK MENJAWAB' && !qState.locked) {
                 startRoundTimer();
@@ -1103,8 +1136,15 @@
                 return;
             }
 
-            // Simpan jawaban kelompok tersebut secara terpisah
+            // Hitung waktu kecepatan menjawab sejak babak dimulai (dalam milidetik)
+            const elapsedMs = Math.max(100, Date.now() - roundStartTimestamp);
+
+            // Simpan jawaban & waktu jawab kelompok tersebut secara terpisah
             qState.currentChoices[teamIndex] = optionLetter;
+            if (!Array.isArray(qState.currentTimesMs)) {
+                qState.currentTimesMs = [null, null, null, null, null];
+            }
+            qState.currentTimesMs[teamIndex] = elapsedMs;
             playTone('select');
 
             // Jika kelima kelompok sudah menjawab semua, ubah status ke MENUNGGU HASIL
@@ -1192,6 +1232,9 @@
 
             qState.attempts += 1;
             const choicesSnapshot = [...qState.currentChoices];
+            const timesSnapshot = Array.isArray(qState.currentTimesMs)
+                ? [...qState.currentTimesMs]
+                : [null, null, null, null, null];
 
             // Cek apakah ada minimal satu kelompok yang menjawab benar
             const anyCorrect = choicesSnapshot.some(choice => choice === qData.correct);
@@ -1205,16 +1248,20 @@
                 // ===============================================================
                 choicesSnapshot.forEach((choice, teamIdx) => {
                     const team = gameState.teams[teamIdx];
+                    const timeTaken = timesSnapshot[teamIdx] || 0;
                     if (choice === qData.correct) {
                         outcomes.push('CORRECT');
                         team.score += 100;
                         team.correctCount += 1;
+                        team.totalCorrectTimeMs = (team.totalCorrectTimeMs || 0) + timeTaken;
+                        team.totalAnswerTimeMs = (team.totalAnswerTimeMs || 0) + timeTaken;
                     } else if (choice === null) {
                         outcomes.push('UNANSWERED');
                         team.unansweredCount += 1;
                     } else {
                         outcomes.push('WRONG');
                         team.wrongCount += 1;
+                        team.totalAnswerTimeMs = (team.totalAnswerTimeMs || 0) + timeTaken;
                     }
                 });
 
@@ -1224,6 +1271,7 @@
                 qState.showExplanation = true; // Tampilkan pembahasan singkat otomatis saat terkunci
                 qState.lastEvaluation = {
                     choices: choicesSnapshot,
+                    timesMs: timesSnapshot,
                     outcomes: outcomes,
                     anyCorrect: true
                 };
@@ -1235,12 +1283,14 @@
                 // ===============================================================
                 choicesSnapshot.forEach((choice, teamIdx) => {
                     const team = gameState.teams[teamIdx];
+                    const timeTaken = timesSnapshot[teamIdx] || 0;
                     if (choice === null) {
                         outcomes.push('UNANSWERED');
                         // Sesuai aturan: Kelompok yang belum menjawab tidak mendapat poin dan tidak dihitung sebagai jawaban salah.
                     } else {
                         outcomes.push('WRONG');
                         team.wrongCount += 1;
+                        team.totalAnswerTimeMs = (team.totalAnswerTimeMs || 0) + timeTaken;
                     }
                 });
 
@@ -1250,6 +1300,7 @@
                 qState.showExplanation = false; // Pembahasan hanya tampil jika guru memilih mengungkapkannya
                 qState.lastEvaluation = {
                     choices: choicesSnapshot,
+                    timesMs: timesSnapshot,
                     outcomes: outcomes,
                     anyCorrect: false,
                     anySubmitted: anySubmitted
@@ -1269,10 +1320,12 @@
 
             playTone('select');
             qState.currentChoices = [null, null, null, null, null];
+            qState.currentTimesMs = [null, null, null, null, null];
             qState.lastEvaluation = null;
             qState.status = 'BABAK MENJAWAB';
             qState.showExplanation = false;
             gameState.timeLeft = gameState.timerDuration;
+            roundStartTimestamp = Date.now();
 
             saveStateToStorage();
             renderGameArena();
@@ -1286,10 +1339,12 @@
 
             playTone('select');
             qState.currentChoices = [null, null, null, null, null];
+            qState.currentTimesMs = [null, null, null, null, null];
             qState.lastEvaluation = null;
             qState.status = 'BABAK MENJAWAB';
             qState.showExplanation = false;
             gameState.timeLeft = gameState.timerDuration;
+            roundStartTimestamp = Date.now();
 
             saveStateToStorage();
             renderGameArena();
@@ -1574,6 +1629,7 @@
             container.innerHTML = gameState.teams.map((team, teamIdx) => {
                 const theme = TEAM_THEMES[teamIdx];
                 const currentChoice = qState.currentChoices[teamIdx];
+                const currentTimeMs = Array.isArray(qState.currentTimesMs) ? qState.currentTimesMs[teamIdx] : null;
                 const hasChosen = currentChoice !== null;
 
                 // Status & lencana untuk setiap panel kelompok
@@ -1583,18 +1639,20 @@
                 if (hasEval) {
                     const outcome = qState.lastEvaluation.outcomes[teamIdx];
                     const evalChoice = qState.lastEvaluation.choices[teamIdx];
+                    const evalTimeMs = Array.isArray(qState.lastEvaluation.timesMs) ? qState.lastEvaluation.timesMs[teamIdx] : null;
+                    const speedTag = evalTimeMs ? ` • ${formatResponseTime(evalTimeMs)}` : '';
 
                     if (outcome === 'CORRECT') {
                         statusBadgeHtml = `
                             <div class="w-full bg-emerald-500 text-slate-950 font-game text-[11px] md:text-xs py-1 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1">
-                                <i class="fas fa-check-circle"></i> BENAR! (+100)
+                                <i class="fas fa-check-circle"></i> BENAR! (+100)${speedTag}
                             </div>
                         `;
                         panelGlowClass = 'ring-4 ring-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.45)]';
                     } else if (outcome === 'WRONG') {
                         statusBadgeHtml = `
                             <div class="w-full bg-rose-600 text-white font-game text-[11px] md:text-xs py-1 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1">
-                                <i class="fas fa-times-circle"></i> PILIHAN ${evalChoice} — SALAH (0)
+                                <i class="fas fa-times-circle"></i> PILIHAN ${evalChoice} — SALAH${speedTag}
                             </div>
                         `;
                     } else {
@@ -1605,9 +1663,10 @@
                         `;
                     }
                 } else if (hasChosen) {
+                    const speedStr = currentTimeMs ? ` (${formatResponseTime(currentTimeMs)})` : '';
                     statusBadgeHtml = `
                         <div class="w-full bg-amber-400 text-slate-950 font-game text-[11px] md:text-xs py-1 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1 animate-LockGlow">
-                            <i class="fas fa-lock text-[10px]"></i> SUDAH MENJAWAB: ${currentChoice}
+                            <i class="fas fa-bolt text-[10px]"></i> TERKUNCI: ${currentChoice}${speedStr}
                         </div>
                     `;
                 } else {
@@ -1796,21 +1855,34 @@
         }
 
         /***********************************************************************
-         * PERINGKAT KELOMPOK & HALAMAN HASIL AKHIR
+         * PERINGKAT KELOMPOK & HALAMAN HASIL AKHIR (DENGAN TIE-BREAKER KECEPATAN)
          ***********************************************************************/
         function getSortedTeamsWithRank() {
-            // Urutkan dari skor tertinggi ke terendah, lalu jawaban benar terbanyak
-            const cloned = gameState.teams.map(t => ({ ...t }));
+            // Urutkan dari:
+            // 1. Skor tertinggi ke terendah
+            // 2. Jumlah jawaban benar terbanyak
+            // 3. Rata-rata waktu menjawab benar TERCEPAT (paling kecil milidetiknya)
+            const cloned = gameState.teams.map(t => ({
+                ...t,
+                avgSpeedMs: getTeamAverageSpeedMs(t)
+            }));
+
             cloned.sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
-                return b.correctCount - a.correctCount;
+                if (b.correctCount !== a.correctCount) return b.correctCount - a.correctCount;
+                return a.avgSpeedMs - b.avgSpeedMs;
             });
 
-            // Berikan peringkat (mendukung peringkat bersama jika skor sama)
+            // Berikan peringkat (Peringkat berbeda jika kecepatan berbeda; hanya seri jika skor DAN kecepatan sama persis)
             let currentRank = 1;
             cloned.forEach((team, idx) => {
-                if (idx > 0 && team.score < cloned[idx - 1].score) {
-                    currentRank = idx + 1;
+                if (idx > 0) {
+                    const prev = cloned[idx - 1];
+                    const sameScore = team.score === prev.score;
+                    const sameSpeed = Math.abs(team.avgSpeedMs - prev.avgSpeedMs) < 10; // toleransi 10ms
+                    if (!sameScore || !sameSpeed) {
+                        currentRank = idx + 1;
+                    }
                 }
                 team.rank = currentRank;
             });
@@ -1825,6 +1897,7 @@
             tbody.innerHTML = ranked.map(team => {
                 const theme = TEAM_THEMES[team.id];
                 const isTop = team.rank === 1 && team.score > 0;
+                const speedLabel = formatResponseTime(team.avgSpeedMs);
                 return `
                     <tr class="${isTop ? 'bg-amber-500/10' : 'bg-slate-900/60'}">
                         <td class="py-3 px-4 text-center font-game text-lg">
@@ -1835,6 +1908,9 @@
                             <span class="text-white font-game text-lg">${escapeHtml(team.name)}</span>
                         </td>
                         <td class="py-3 px-4 text-center font-game text-xl text-amber-400">${team.score}</td>
+                        <td class="py-3 px-4 text-center font-game text-sm text-amber-300">
+                            <i class="fas fa-bolt mr-1"></i>${speedLabel}
+                        </td>
                         <td class="py-3 px-4 text-center text-emerald-400">${team.correctCount}</td>
                         <td class="py-3 px-4 text-center text-rose-400">${team.wrongCount}</td>
                         <td class="py-3 px-4 text-center text-slate-400">${team.unansweredCount}</td>
@@ -1854,32 +1930,52 @@
             startConfetti();
 
             const ranked = getSortedTeamsWithRank();
-            const highestScore = ranked[0].score;
-            const winners = ranked.filter(t => t.score === highestScore && highestScore > 0);
+            const topTeam = ranked[0];
+            const highestScore = topTeam.score;
 
-            // 1. Render Banner Pemenang (Mendukung Pemenang Tunggal maupun Pemenang Bersama)
+            // Cek apakah ada lebih dari satu kelompok yang memiliki skor tertinggi yang sama
+            const tiedScoreTeams = ranked.filter(t => t.score === highestScore && highestScore > 0);
+            // Pemenang adalah yang berada di peringkat #1 (sudah diurutkan berdasarkan kecepatan tercepat jika skor sama)
+            const winners = ranked.filter(t => t.rank === 1 && t.score > 0);
+            const wonBySpeedTieBreaker = tiedScoreTeams.length > 1 && winners.length === 1;
+
+            // 1. Render Banner Pemenang
             const winnerBanner = document.getElementById('final-winner-banner');
-            if (winners.length === 0) {
+            if (highestScore === 0) {
                 winnerBanner.innerHTML = `
                     <div class="text-amber-300 font-game text-xl mb-1">PERMAINAN SELESAI</div>
                     <div class="text-2xl font-extrabold text-white">Belum ada poin yang tercatat pada permainan ini.</div>
                 `;
             } else if (winners.length === 1) {
+                const winner = winners[0];
+                const speedBadge = isFinite(winner.avgSpeedMs)
+                    ? `<span class="inline-flex items-center gap-1.5 bg-amber-400/20 border border-amber-300 text-amber-200 px-3.5 py-1 rounded-full text-sm font-extrabold ml-2"><i class="fas fa-bolt text-amber-300"></i> Rata-rata Jawab: ${formatResponseTime(winner.avgSpeedMs)}</span>`
+                    : '';
+                const tieBreakerNote = wonBySpeedTieBreaker
+                    ? `<div class="mt-2 inline-block bg-emerald-500/20 border border-emerald-400 text-emerald-200 px-4 py-1 rounded-xl text-xs md:text-sm font-extrabold">
+                         ⚡ MENANG KECEPATAN MENJAWAB! (Skor akhir sama ${highestScore} Poin, tetapi ${escapeHtml(winner.name)} unggul paling cepat menjawab)
+                       </div>`
+                    : '';
+
                 winnerBanner.innerHTML = `
-                    <div class="text-amber-300 font-extrabold text-sm uppercase tracking-widest mb-1">🎉 SELAMAT KEPADA KELOMPOK PEMENANG UTAMA 🎉</div>
-                    <div class="font-game text-4xl md:text-5xl text-white drop-shadow my-1">👑 ${escapeHtml(winners[0].name)}</div>
-                    <div class="text-amber-200 font-bold text-lg">Total Skor Tertinggi: <span class="font-game text-2xl text-amber-300">${highestScore} POIN</span></div>
+                    <div class="text-amber-300 font-extrabold text-sm uppercase tracking-widest mb-1">🎉 SELAMAT KEPADA KELOMPOK JUARA 1 🎉</div>
+                    <div class="font-game text-4xl md:text-5xl text-white drop-shadow my-1">👑 ${escapeHtml(winner.name)}</div>
+                    <div class="text-amber-200 font-bold text-lg flex flex-wrap items-center justify-center gap-2 mt-1">
+                        <span>Total Skor: <strong class="font-game text-2xl text-amber-300">${highestScore} POIN</strong></span>
+                        ${speedBadge}
+                    </div>
+                    ${tieBreakerNote}
                 `;
             } else {
                 const winnerNames = winners.map(w => escapeHtml(w.name)).join(' & ');
                 winnerBanner.innerHTML = `
                     <div class="text-amber-300 font-extrabold text-sm uppercase tracking-widest mb-1">🎉 SELAMAT KEPADA PEMENANG BERSAMA 🎉</div>
                     <div class="font-game text-3xl md:text-4xl text-white drop-shadow my-1">👑 ${winnerNames}</div>
-                    <div class="text-amber-200 font-bold text-lg">Berbagi Peringkat Pertama dengan Skor: <span class="font-game text-2xl text-amber-300">${highestScore} POIN</span></div>
+                    <div class="text-amber-200 font-bold text-lg">Berbagi Peringkat Pertama dengan Skor & Kecepatan Sama: <span class="font-game text-2xl text-amber-300">${highestScore} POIN</span></div>
                 `;
             }
 
-            // 2. Render Tabel Leaderboard Lengkap
+            // 2. Render Tabel Leaderboard Lengkap dengan Kolom Kecepatan
             const tbody = document.getElementById('final-leaderboard-body');
             tbody.innerHTML = ranked.map(team => {
                 const theme = TEAM_THEMES[team.id];
@@ -1887,25 +1983,32 @@
                 const accuracyPct = totalGivenAnswers > 0
                     ? Math.round((team.correctCount / totalGivenAnswers) * 100)
                     : 0;
-                const isWinner = team.score === highestScore && highestScore > 0;
+                const isWinner = team.rank === 1 && team.score > 0;
+                const speedText = formatResponseTime(team.avgSpeedMs);
 
                 return `
                     <tr class="${isWinner ? 'bg-amber-500/15' : 'hover:bg-slate-800/60'} transition-colors">
-                        <td class="py-4 px-5 text-center font-game text-2xl ${isWinner ? 'text-amber-300' : 'text-slate-300'}">
+                        <td class="py-4 px-4 text-center font-game text-2xl ${isWinner ? 'text-amber-300' : 'text-slate-300'}">
                             ${isWinner ? '🏆 #1' : `#${team.rank}`}
                         </td>
-                        <td class="py-4 px-5">
-                            <div class="flex items-center gap-3">
+                        <td class="py-4 px-4">
+                            <div class="flex items-center gap-2.5">
                                 <span class="${theme.headerBg} w-4 h-4 rounded-full shrink-0"></span>
                                 <span class="font-game text-xl text-white">${escapeHtml(team.name)}</span>
-                                ${isWinner ? '<span class="bg-amber-400 text-slate-950 font-game text-xs px-2.5 py-0.5 rounded-full">JUARA</span>' : ''}
+                                ${isWinner ? '<span class="bg-amber-400 text-slate-950 font-game text-xs px-2.5 py-0.5 rounded-full">JUARA 1</span>' : ''}
+                                ${isWinner && wonBySpeedTieBreaker ? '<span class="bg-emerald-400 text-slate-950 font-game text-[11px] px-2 py-0.5 rounded-full"><i class="fas fa-bolt"></i> TERCEPAT</span>' : ''}
                             </div>
                         </td>
-                        <td class="py-4 px-5 text-center font-game text-2xl text-amber-400">${team.score}</td>
-                        <td class="py-4 px-5 text-center text-emerald-400 text-lg">${team.correctCount}</td>
-                        <td class="py-4 px-5 text-center text-rose-400 text-lg">${team.wrongCount}</td>
-                        <td class="py-4 px-5 text-center text-slate-400 text-lg">${team.unansweredCount}</td>
-                        <td class="py-4 px-5 text-center">
+                        <td class="py-4 px-4 text-center font-game text-2xl text-amber-400">${team.score}</td>
+                        <td class="py-4 px-4 text-center">
+                            <span class="bg-amber-500/15 border border-amber-400/40 text-amber-300 px-3 py-1 rounded-xl font-game text-base inline-flex items-center gap-1.5">
+                                <i class="fas fa-bolt text-xs"></i> ${speedText}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 text-center text-emerald-400 text-lg">${team.correctCount}</td>
+                        <td class="py-4 px-4 text-center text-rose-400 text-lg">${team.wrongCount}</td>
+                        <td class="py-4 px-4 text-center text-slate-400 text-lg">${team.unansweredCount}</td>
+                        <td class="py-4 px-4 text-center">
                             <span class="bg-sky-500/20 border border-sky-400/50 text-sky-300 px-3 py-1 rounded-xl font-game text-base">
                                 ${accuracyPct}%
                             </span>
@@ -1924,16 +2027,18 @@
                 const evalInfo = qState.lastEvaluation;
 
                 const teamBadges = gameState.teams.map((team, tIdx) => {
-                    const theme = TEAM_THEMES[tIdx];
                     if (!evalInfo) {
                         return `<span class="bg-slate-800 text-slate-400 border border-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold">${escapeHtml(team.name)}: -</span>`;
                     }
                     const choice = evalInfo.choices[tIdx] || '-';
                     const outcome = evalInfo.outcomes[tIdx];
+                    const timeTaken = Array.isArray(evalInfo.timesMs) && evalInfo.timesMs[tIdx]
+                        ? ` • ${formatResponseTime(evalInfo.timesMs[tIdx])}`
+                        : '';
                     if (outcome === 'CORRECT') {
-                        return `<span class="bg-emerald-900/90 text-emerald-200 border border-emerald-400 px-2.5 py-1 rounded-lg text-xs font-bold">✅ ${escapeHtml(team.name)}: ${choice} (+100)</span>`;
+                        return `<span class="bg-emerald-900/90 text-emerald-200 border border-emerald-400 px-2.5 py-1 rounded-lg text-xs font-bold">✅ ${escapeHtml(team.name)}: ${choice} (+100${timeTaken})</span>`;
                     } else if (outcome === 'WRONG') {
-                        return `<span class="bg-rose-900/80 text-rose-200 border border-rose-500 px-2.5 py-1 rounded-lg text-xs font-bold">❌ ${escapeHtml(team.name)}: ${choice} (0)</span>`;
+                        return `<span class="bg-rose-900/80 text-rose-200 border border-rose-500 px-2.5 py-1 rounded-lg text-xs font-bold">❌ ${escapeHtml(team.name)}: ${choice} (0${timeTaken})</span>`;
                     } else {
                         return `<span class="bg-slate-800 text-slate-300 border border-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold">⚪ ${escapeHtml(team.name)}: Kosong (0)</span>`;
                     }
@@ -1967,11 +2072,13 @@
             const rowsHtml = ranked.map(team => {
                 const totalGiven = team.correctCount + team.wrongCount;
                 const acc = totalGiven > 0 ? Math.round((team.correctCount / totalGiven) * 100) : 0;
+                const speedStr = formatResponseTime(team.avgSpeedMs);
                 return `
                     <tr>
                         <td style="border:1px solid #333; padding:8px; text-align:center;">#${team.rank}</td>
                         <td style="border:1px solid #333; padding:8px; font-weight:bold;">${escapeHtml(team.name)}</td>
                         <td style="border:1px solid #333; padding:8px; text-align:center; font-weight:bold;">${team.score}</td>
+                        <td style="border:1px solid #333; padding:8px; text-align:center;">${speedStr}</td>
                         <td style="border:1px solid #333; padding:8px; text-align:center;">${team.correctCount}</td>
                         <td style="border:1px solid #333; padding:8px; text-align:center;">${team.wrongCount}</td>
                         <td style="border:1px solid #333; padding:8px; text-align:center;">${team.unansweredCount}</td>
@@ -1990,6 +2097,7 @@
                                 <th style="border:1px solid #333; padding:8px;">Peringkat</th>
                                 <th style="border:1px solid #333; padding:8px; text-align:left;">Nama Kelompok</th>
                                 <th style="border:1px solid #333; padding:8px;">Total Poin</th>
+                                <th style="border:1px solid #333; padding:8px;">Rata-rata Kecepatan</th>
                                 <th style="border:1px solid #333; padding:8px;">Benar</th>
                                 <th style="border:1px solid #333; padding:8px;">Salah</th>
                                 <th style="border:1px solid #333; padding:8px;">Tidak Dijawab</th>
