@@ -183,10 +183,10 @@
     <!-- ======================================================================= -->
     <!-- 2. LAYAR UTAMA PERMAINAN (GAME ARENA 16:9)                              -->
     <!-- ======================================================================= -->
-    <main id="screen-game" class="hidden w-screen h-screen flex flex-col justify-between p-2 md:p-3 gap-2 overflow-hidden no-print">
+    <main id="screen-game" class="hidden w-screen h-screen flex flex-col justify-between p-2 md:p-2.5 gap-2 overflow-hidden no-print">
         
         <!-- ==================== BAGIAN ATAS: INFO SOAL, KONTROL GURU & SKOR RINGKAS ==================== -->
-        <header class="w-full bg-slate-900/95 border-2 border-slate-700/80 rounded-2xl px-3 py-2 flex flex-col gap-2 shadow-xl shrink-0">
+        <header class="w-full bg-slate-900/95 border-2 border-slate-700/80 rounded-2xl px-3 py-1.5 flex flex-col gap-1.5 shadow-xl shrink-0">
             
             <!-- BARIS 1: Info Soal & Progres (Kiri) + Kontrol Guru (Kanan) -->
             <div class="w-full flex flex-wrap items-center justify-between gap-2">
@@ -263,15 +263,15 @@
         </header>
 
         <!-- ==================== BAGIAN TENGAH: PANEL PERTANYAAN & OPSI BACAAN ==================== -->
-        <section class="w-full flex-1 min-h-0 flex flex-col justify-between bg-gradient-to-b from-slate-900/95 to-indigo-950/90 border-2 border-indigo-500/40 rounded-3xl p-4 shadow-2xl relative overflow-hidden">
+        <section id="question-arena-section" class="w-full flex-1 min-h-0 flex flex-col justify-between bg-gradient-to-b from-slate-900/95 to-indigo-950/90 border-2 border-indigo-500/40 rounded-3xl p-3 md:p-4 shadow-2xl relative overflow-y-auto gap-2">
             
             <!-- Banner Status / Umpan Balik Babak (Muncul saat Hasil / Coba Lagi / Waktu Habis) -->
-            <div id="round-feedback-banner" class="hidden w-full mb-2 px-4 py-2 rounded-2xl border-2 flex items-center justify-between gap-4 shadow-lg shrink-0 z-10">
-                <div class="flex items-center gap-3">
-                    <i id="feedback-icon" class="fas fa-info-circle text-2xl"></i>
-                    <div>
-                        <div id="feedback-title" class="font-game text-lg leading-tight">STATUS BABAK</div>
-                        <div id="feedback-subtitle" class="text-xs font-bold opacity-90">Detail status babak saat ini.</div>
+            <div id="round-feedback-banner" class="hidden w-full px-3.5 py-2 rounded-2xl border-2 flex flex-wrap items-center justify-between gap-2 shadow-lg shrink-0 z-10">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <i id="feedback-icon" class="fas fa-info-circle text-xl shrink-0"></i>
+                    <div class="min-w-0">
+                        <div id="feedback-title" class="font-game text-sm md:text-base leading-tight">STATUS BABAK</div>
+                        <div id="feedback-subtitle" class="text-[11px] md:text-xs font-bold opacity-90 leading-tight">Detail status babak saat ini.</div>
                     </div>
                 </div>
                 <div id="feedback-actions" class="flex items-center gap-2 shrink-0">
@@ -280,34 +280,34 @@
             </div>
 
             <!-- Teks Pertanyaan Utama -->
-            <div class="my-auto flex flex-col justify-center items-center text-center px-4">
-                <p id="question-text" class="font-extrabold text-2xl lg:text-3xl xl:text-4xl text-white leading-snug tracking-normal drop-shadow max-w-6xl">
+            <div class="my-auto flex flex-col justify-center items-center text-center px-2 py-1 shrink-0">
+                <p id="question-text" class="font-extrabold text-xl md:text-2xl lg:text-3xl text-white leading-snug tracking-normal drop-shadow max-w-6xl transition-all">
                     Memuat pertanyaan...
                 </p>
             </div>
 
             <!-- 4 Kartu Pilihan Jawaban untuk Dibaca Seluruh Kelas -->
-            <div id="question-options-board" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-2 shrink-0">
+            <div id="question-options-board" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 shrink-0">
                 <!-- Kartu A, B, C, D diisi via JS -->
             </div>
 
-            <!-- Kotak Pembahasan Singkat (Overlay di bagian bawah kartu soal jika diaktifkan) -->
-            <div id="explanation-panel" class="hidden mt-2 bg-emerald-950/95 border-2 border-emerald-400 text-emerald-100 px-4 py-2.5 rounded-2xl flex items-center justify-between gap-4 shadow-xl shrink-0">
-                <div class="flex items-center gap-3 text-sm md:text-base">
-                    <span class="bg-emerald-400 text-slate-950 font-game px-3 py-1 rounded-xl text-xs uppercase shrink-0">
+            <!-- Kotak Pembahasan Singkat (Muncul rapi tanpa menutupi soal/pilihan) -->
+            <div id="explanation-panel" class="hidden bg-emerald-950/95 border-2 border-emerald-400 text-emerald-100 px-3.5 py-2 rounded-2xl flex items-center justify-between gap-3 shadow-xl shrink-0">
+                <div class="flex items-center gap-2.5 text-xs md:text-sm leading-snug">
+                    <span class="bg-emerald-400 text-slate-950 font-game px-2.5 py-1 rounded-xl text-xs uppercase shrink-0">
                         <i class="fas fa-lightbulb mr-1"></i> Pembahasan
                     </span>
                     <p id="explanation-text" class="font-bold text-white"></p>
                 </div>
-                <button onclick="toggleExplanation(false)" class="text-emerald-300 hover:text-white px-2 py-1 text-sm font-bold shrink-0">
+                <button onclick="toggleExplanation(false)" class="text-emerald-300 hover:text-white px-2 py-1 text-xs font-bold shrink-0">
                     <i class="fas fa-times"></i> Tutup
                 </button>
             </div>
         </section>
 
         <!-- ==================== BAGIAN BAWAH: 5 PANEL KELOMPOK (AREA SENTUH SISWA) ==================== -->
-        <section class="w-full h-[43%] min-h-[250px] max-h-[360px] shrink-0 flex flex-col justify-end">
-            <div id="teams-panel-container" class="w-full h-full grid grid-cols-5 gap-3.5">
+        <section id="bottom-teams-section" class="w-full h-[38%] min-h-[210px] max-h-[310px] shrink-0 flex flex-col justify-end transition-all duration-300">
+            <div id="teams-panel-container" class="w-full h-full grid grid-cols-5 gap-2.5 md:gap-3">
                 <!-- Kelima Panel Kelompok Dirender via JS dengan jarak aman dan tombol A, B, C, D berukuran besar -->
             </div>
         </section>
@@ -1454,8 +1454,22 @@
             // 5. Render Banner Feedback Babak (Jika baru saja dievaluasi)
             renderFeedbackBanner(qData, qState, qIndex);
 
+            // Sesuaikan proporsi tinggi panel bawah & ukuran font soal secara dinamis
+            // Saat hasil/pembahasan tampil, panel bawah dibuat lebih ringkas agar soal, opsi, dan pembahasan 100% terlihat jelas
+            const isResultOrExplanationShown = Boolean(qState.lastEvaluation) || Boolean(qState.showExplanation);
+            const bottomSection = document.getElementById('bottom-teams-section');
+            const qTextEl = document.getElementById('question-text');
+
+            if (isResultOrExplanationShown) {
+                bottomSection.className = 'w-full h-[30%] min-h-[175px] max-h-[235px] shrink-0 flex flex-col justify-end transition-all duration-300';
+                qTextEl.className = 'font-extrabold text-lg md:text-xl lg:text-2xl text-white leading-snug tracking-normal drop-shadow max-w-6xl transition-all';
+            } else {
+                bottomSection.className = 'w-full h-[38%] min-h-[215px] max-h-[310px] shrink-0 flex flex-col justify-end transition-all duration-300';
+                qTextEl.className = 'font-extrabold text-xl md:text-2xl lg:text-3xl text-white leading-snug tracking-normal drop-shadow max-w-6xl transition-all';
+            }
+
             // 6. Render Teks Pertanyaan & 4 Kartu Opsi Bacaan
-            document.getElementById('question-text').textContent = qData.question;
+            qTextEl.textContent = qData.question;
 
             const optionsBoard = document.getElementById('question-options-board');
             const optionLetters = ['A', 'B', 'C', 'D'];
@@ -1473,14 +1487,14 @@
                 }
 
                 return `
-                    <div class="flex items-center gap-3 p-3 rounded-2xl border-2 ${cardStyle} transition-all">
-                        <div class="w-10 h-10 rounded-xl font-game text-xl flex items-center justify-center border shrink-0 ${badgeStyle}">
+                    <div class="flex items-center gap-2.5 p-2.5 rounded-2xl border-2 ${cardStyle} transition-all">
+                        <div class="w-8 h-8 md:w-9 md:h-9 rounded-xl font-game text-lg md:text-xl flex items-center justify-center border shrink-0 ${badgeStyle}">
                             ${letter}
                         </div>
-                        <div class="font-extrabold text-base lg:text-lg leading-snug flex-1">
+                        <div class="font-extrabold text-sm md:text-base lg:text-lg leading-tight flex-1">
                             ${escapeHtml(qData.options[letter])}
                         </div>
-                        ${revealAnswerKey && isCorrectOption ? '<i class="fas fa-check-circle text-2xl text-emerald-400 shrink-0"></i>' : ''}
+                        ${revealAnswerKey && isCorrectOption ? '<i class="fas fa-check-circle text-xl text-emerald-400 shrink-0"></i>' : ''}
                     </div>
                 `;
             }).join('');
@@ -1519,33 +1533,33 @@
                     if (out === 'CORRECT') winnersNames.push(gameState.teams[idx].name);
                 });
 
-                banner.className = 'w-full mb-2 px-4 py-2 rounded-2xl border-2 bg-emerald-950/95 border-emerald-400 text-emerald-100 flex items-center justify-between gap-4 shadow-xl shrink-0 z-10';
-                icon.className = 'fas fa-trophy text-2xl text-amber-400';
+                banner.className = 'w-full px-3.5 py-2 rounded-2xl border-2 bg-emerald-950/95 border-emerald-400 text-emerald-100 flex flex-wrap items-center justify-between gap-2 shadow-xl shrink-0 z-10';
+                icon.className = 'fas fa-trophy text-xl text-amber-400 shrink-0';
                 title.textContent = `HEBAT! SOAL TERKUNCI — ${winnersNames.join(', ')} MENJAWAB BENAR (+100 POIN)`;
                 subtitle.textContent = `Kunci Jawaban: ${qData.correct}. Soal ini telah dikunci dan siap lanjut ke soal berikutnya.`;
 
                 const nextLabel = qIndex === QUESTIONS_BANK.length - 1 ? 'LIHAT HASIL AKHIR' : 'SOAL BERIKUTNYA';
                 actions.innerHTML = `
-                    <button onclick="toggleExplanation()" class="btn-touch bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-400/50 font-bold text-xs px-3.5 py-2 rounded-xl">
+                    <button onclick="toggleExplanation()" class="btn-touch bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-400/50 font-bold text-xs px-3 py-1.5 rounded-xl">
                         <i class="fas fa-lightbulb mr-1"></i> ${qState.showExplanation ? 'Sembunyikan Pembahasan' : 'Tampilkan Pembahasan'}
                     </button>
-                    <button onclick="teacherNextQuestion()" class="btn-touch bg-amber-400 hover:bg-amber-300 text-slate-950 font-game text-sm px-5 py-2 rounded-xl border border-white shadow">
+                    <button onclick="teacherNextQuestion()" class="btn-touch bg-amber-400 hover:bg-amber-300 text-slate-950 font-game text-xs md:text-sm px-4 py-1.5 rounded-xl border border-white shadow">
                         ${nextLabel} <i class="fas fa-arrow-right ml-1"></i>
                     </button>
                 `;
             } else {
                 // KONDISI B: Semua kelompok yang menjawab salah
-                banner.className = 'w-full mb-2 px-4 py-2 rounded-2xl border-2 bg-rose-950/95 border-rose-400 text-rose-100 flex items-center justify-between gap-4 shadow-xl shrink-0 z-10';
-                icon.className = 'fas fa-rotate-right text-2xl text-amber-300';
+                banner.className = 'w-full px-3.5 py-2 rounded-2xl border-2 bg-rose-950/95 border-rose-400 text-rose-100 flex flex-wrap items-center justify-between gap-2 shadow-xl shrink-0 z-10';
+                icon.className = 'fas fa-rotate-right text-xl text-amber-300 shrink-0';
                 title.textContent = 'BELUM ADA JAWABAN BENAR! COBA LAGI';
                 subtitle.textContent = 'Tidak ada pengurangan poin. Soal tetap terbuka! Tekan tombol COBA LAGI agar kelima kelompok dapat menjawab kembali.';
 
                 actions.innerHTML = `
-                    <button onclick="toggleExplanation()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-400/50 font-bold text-xs px-3.5 py-2 rounded-xl">
+                    <button onclick="toggleExplanation()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-400/50 font-bold text-xs px-3 py-1.5 rounded-xl">
                         <i class="fas fa-eye mr-1"></i> ${qState.showExplanation ? 'Sembunyikan Pembahasan' : 'Tampilkan Pembahasan'}
                     </button>
-                    <button onclick="teacherRetrySameQuestion()" class="btn-touch bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-game text-sm px-6 py-2 rounded-xl border-2 border-white shadow-lg animate-pulse">
-                        <i class="fas fa-redo mr-1.5"></i> COBA LAGI
+                    <button onclick="teacherRetrySameQuestion()" class="btn-touch bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-game text-xs md:text-sm px-5 py-1.5 rounded-xl border-2 border-white shadow-lg animate-pulse">
+                        <i class="fas fa-redo mr-1"></i> COBA LAGI
                     </button>
                 `;
             }
@@ -1555,6 +1569,7 @@
             const container = document.getElementById('teams-panel-container');
             const letters = ['A', 'B', 'C', 'D'];
             const hasEval = Boolean(qState.lastEvaluation);
+            const isCompactMode = hasEval || Boolean(qState.showExplanation);
 
             container.innerHTML = gameState.teams.map((team, teamIdx) => {
                 const theme = TEAM_THEMES[teamIdx];
@@ -1571,39 +1586,40 @@
 
                     if (outcome === 'CORRECT') {
                         statusBadgeHtml = `
-                            <div class="w-full bg-emerald-500 text-slate-950 font-game text-xs py-1.5 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1.5">
-                                <i class="fas fa-check-circle text-sm"></i> BENAR! (+100 POIN)
+                            <div class="w-full bg-emerald-500 text-slate-950 font-game text-[11px] md:text-xs py-1 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1">
+                                <i class="fas fa-check-circle"></i> BENAR! (+100)
                             </div>
                         `;
                         panelGlowClass = 'ring-4 ring-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.45)]';
                     } else if (outcome === 'WRONG') {
                         statusBadgeHtml = `
-                            <div class="w-full bg-rose-600 text-white font-game text-xs py-1.5 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1.5">
-                                <i class="fas fa-times-circle text-sm"></i>PILIHAN ${evalChoice} — SALAH (0)
+                            <div class="w-full bg-rose-600 text-white font-game text-[11px] md:text-xs py-1 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1">
+                                <i class="fas fa-times-circle"></i> PILIHAN ${evalChoice} — SALAH (0)
                             </div>
                         `;
                     } else {
                         statusBadgeHtml = `
-                            <div class="w-full bg-slate-700 text-slate-200 font-game text-xs py-1.5 px-2 rounded-xl text-center flex items-center justify-center gap-1.5">
-                                <i class="fas fa-minus-circle text-sm"></i> BELUM MENJAWAB (0)
+                            <div class="w-full bg-slate-700 text-slate-200 font-game text-[11px] md:text-xs py-1 px-2 rounded-xl text-center flex items-center justify-center gap-1">
+                                <i class="fas fa-minus-circle"></i> BELUM MENJAWAB (0)
                             </div>
                         `;
                     }
                 } else if (hasChosen) {
                     statusBadgeHtml = `
-                        <div class="w-full bg-amber-400 text-slate-950 font-game text-xs py-1.5 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1.5 animate-LockGlow">
-                            <i class="fas fa-lock text-xs"></i> SUDAH MENJAWAB: PILIHAN ${currentChoice}
+                        <div class="w-full bg-amber-400 text-slate-950 font-game text-[11px] md:text-xs py-1 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1 animate-LockGlow">
+                            <i class="fas fa-lock text-[10px]"></i> SUDAH MENJAWAB: ${currentChoice}
                         </div>
                     `;
                 } else {
                     statusBadgeHtml = `
-                        <div class="w-full bg-slate-800/90 border border-slate-600 text-slate-300 font-extrabold text-xs py-1.5 px-2 rounded-xl text-center flex items-center justify-center gap-1.5">
-                            <i class="fas fa-hand-point-up text-amber-400 animate-bounce"></i> SENTUH A, B, C, ATAU D
+                        <div class="w-full bg-slate-800/90 border border-slate-600 text-slate-300 font-extrabold text-[11px] md:text-xs py-1 px-2 rounded-xl text-center flex items-center justify-center gap-1">
+                            <i class="fas fa-hand-point-up text-amber-400 animate-bounce"></i> SENTUH A / B / C / D
                         </div>
                     `;
                 }
 
-                // Render Keempat Tombol A, B, C, D berukuran besar
+                // Render Keempat Tombol A, B, C, D
+                const btnFontSize = isCompactMode ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl xl:text-4xl';
                 const buttonsGridHtml = letters.map(letter => {
                     const isSelectedByTeam = currentChoice === letter;
                     const isDisabled = qState.locked || hasChosen || hasEval || qState.status !== 'BABAK MENJAWAB';
@@ -1617,11 +1633,11 @@
 
                         if (evalChoice === letter) {
                             if (outcome === 'CORRECT') {
-                                btnClass = 'bg-emerald-500 text-slate-950 border-white ring-4 ring-emerald-300 scale-105';
-                                indicatorIcon = '<i class="fas fa-check text-base ml-1"></i>';
+                                btnClass = 'bg-emerald-500 text-slate-950 border-white ring-2 ring-emerald-300';
+                                indicatorIcon = '<i class="fas fa-check text-sm ml-1"></i>';
                             } else {
                                 btnClass = 'bg-rose-600 text-white border-rose-200 opacity-95';
-                                indicatorIcon = '<i class="fas fa-xmark text-base ml-1"></i>';
+                                indicatorIcon = '<i class="fas fa-xmark text-sm ml-1"></i>';
                             }
                         } else if (qState.locked && qData.correct === letter) {
                             // Tampilkan indikator kunci jawaban halus hanya ketika soal sudah terkunci
@@ -1632,8 +1648,8 @@
                     } else if (hasChosen) {
                         if (isSelectedByTeam) {
                             // Tampilkan pilihan yang telah dipilih tanpa memberitahu benar/salah
-                            btnClass = 'bg-amber-400 text-slate-950 border-white ring-4 ring-amber-300/70 scale-[1.03]';
-                            indicatorIcon = '<i class="fas fa-lock text-sm ml-1"></i>';
+                            btnClass = 'bg-amber-400 text-slate-950 border-white ring-4 ring-amber-300/70 scale-[1.02]';
+                            indicatorIcon = '<i class="fas fa-lock text-xs ml-1"></i>';
                         } else {
                             btnClass = 'bg-slate-800/50 text-slate-500 border-slate-700/60 opacity-45';
                         }
@@ -1647,7 +1663,7 @@
                             type="button"
                             ${isDisabled ? 'disabled' : ''}
                             onclick="selectTeamAnswer(${teamIdx}, '${letter}')"
-                            class="ans-btn w-full h-full rounded-2xl border-2 font-game text-2xl md:text-3xl xl:text-4xl flex items-center justify-center select-none ${btnClass}"
+                            class="ans-btn w-full h-full rounded-xl border-2 font-game ${btnFontSize} flex items-center justify-center select-none ${btnClass}"
                         >
                             <span>${letter}</span>${indicatorIcon}
                         </button>
@@ -1655,25 +1671,25 @@
                 }).join('');
 
                 return `
-                    <div class="h-full bg-gradient-to-b ${theme.bgPanel} border-2 ${theme.borderPanel} rounded-3xl p-2.5 flex flex-col justify-between shadow-2xl transition-all min-w-0 ${panelGlowClass}">
+                    <div class="h-full bg-gradient-to-b ${theme.bgPanel} border-2 ${theme.borderPanel} rounded-3xl p-2 flex flex-col justify-between shadow-2xl transition-all min-w-0 ${panelGlowClass}">
                         <!-- Header Panel Kelompok: Nama & Skor Terpisah Rapi Anti-Tumpuk -->
-                        <div class="flex flex-col gap-1 pb-1.5 border-b border-white/15 shrink-0">
-                            <div class="flex items-center justify-between gap-1 min-w-0">
-                                <span class="${theme.headerBg} font-game text-[11px] px-2 py-0.5 rounded-lg uppercase tracking-wider shrink-0 shadow">
+                        <div class="flex items-center justify-between gap-1.5 pb-1 border-b border-white/15 shrink-0 min-w-0">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <span class="${theme.headerBg} font-game text-[11px] px-1.5 py-0.5 rounded-md uppercase shrink-0 shadow leading-none">
                                     K${teamIdx + 1}
                                 </span>
-                                <div class="bg-slate-950/95 border border-white/20 px-2.5 py-0.5 rounded-xl flex items-baseline gap-1 shrink-0 shadow">
-                                    <span class="font-game text-base md:text-lg xl:text-xl ${theme.badgeText} leading-none">${team.score}</span>
-                                    <span class="text-[10px] font-extrabold text-slate-300 leading-none">POIN</span>
-                                </div>
+                                <h3 class="font-game text-xs md:text-sm text-white truncate leading-tight" title="${escapeHtml(team.name)}">
+                                    ${escapeHtml(team.name)}
+                                </h3>
                             </div>
-                            <h3 class="font-game text-sm md:text-base text-white truncate text-left leading-tight" title="${escapeHtml(team.name)}">
-                                ${escapeHtml(team.name)}
-                            </h3>
+                            <div class="bg-slate-950/95 border border-white/20 px-2 py-0.5 rounded-lg flex items-baseline gap-1 shrink-0 shadow">
+                                <span class="font-game text-sm md:text-base ${theme.badgeText} leading-none">${team.score}</span>
+                                <span class="text-[9px] font-extrabold text-slate-300 leading-none">POIN</span>
+                            </div>
                         </div>
 
                         <!-- Grid 2x2 Tombol Pilihan A, B, C, D Berukuran Besar -->
-                        <div class="grid grid-cols-2 grid-rows-2 gap-2 my-1.5 flex-1 min-h-0">
+                        <div class="grid grid-cols-2 grid-rows-2 gap-1.5 my-1 flex-1 min-h-0">
                             ${buttonsGridHtml}
                         </div>
 
