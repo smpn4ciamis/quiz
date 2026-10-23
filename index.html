@@ -133,8 +133,11 @@
                 <span class="text-sm font-bold text-slate-300 tracking-wide">MODE LAYAR SENTUH PID INTERAKTIF (16:9) • SD KELAS 6</span>
             </div>
             <div class="flex items-center gap-3">
+                <button onclick="toggleBgm()" id="btn-bgm-home" class="btn-touch bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400 px-4 py-2.5 rounded-2xl font-bold flex items-center gap-2 text-base shadow-lg">
+                    <i class="fas fa-music text-lg animate-bounce"></i> <span>Musik: ON</span>
+                </button>
                 <button onclick="toggleSound()" id="btn-sound-home" class="btn-touch bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-600 px-4 py-2.5 rounded-2xl font-bold flex items-center gap-2 text-base shadow-lg">
-                    <i class="fas fa-volume-up text-lg"></i> <span>Suara: ON</span>
+                    <i class="fas fa-volume-up text-lg"></i> <span>Efek Suara: ON</span>
                 </button>
                 <button onclick="toggleFullScreen()" class="btn-touch bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-400 px-5 py-2.5 rounded-2xl font-bold flex items-center gap-2 text-base shadow-lg">
                     <i class="fas fa-expand text-lg"></i> <span>Layar Penuh</span>
@@ -238,6 +241,22 @@
                     </button>
 
                     <!-- Menu Kontrol Guru Lainnya -->
+                    <div class="flex items-center bg-slate-800/90 border border-slate-600 rounded-xl p-0.5 gap-0.5 shrink-0" title="Soundboard Reaksi Guru">
+                        <button onclick="playTeacherReaction('applause')" class="btn-touch hover:bg-slate-700 text-amber-300 font-bold text-xs px-2 py-1.5 rounded-lg flex items-center gap-1" title="Bunyikan Tepuk Tangan Meriah">
+                            <span>👏</span> <span class="hidden 2xl:inline text-[11px]">Tepuk</span>
+                        </button>
+                        <button onclick="playTeacherReaction('drumroll')" class="btn-touch hover:bg-slate-700 text-sky-300 font-bold text-xs px-2 py-1.5 rounded-lg flex items-center gap-1" title="Bunyikan Drumroll Ketegangan">
+                            <span>🥁</span> <span class="hidden 2xl:inline text-[11px]">Drum</span>
+                        </button>
+                        <button onclick="playTeacherReaction('cheer')" class="btn-touch hover:bg-slate-700 text-emerald-300 font-bold text-xs px-2 py-1.5 rounded-lg flex items-center gap-1" title="Bunyikan Terompet Semangat">
+                            <span>🎉</span> <span class="hidden 2xl:inline text-[11px]">Hore</span>
+                        </button>
+                    </div>
+
+                    <button onclick="speakCurrentQuestion()" id="btn-tts-question" class="btn-touch bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs px-2.5 py-2 rounded-xl border border-purple-400 shadow flex items-center gap-1 shrink-0" title="Bacakan Soal dengan Suara">
+                        <i class="fas fa-volume-high"></i> <span class="hidden xl:inline">Baca Soal</span>
+                    </button>
+
                     <button onclick="openModal('modal-scoreboard')" class="btn-touch bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-xs px-2.5 py-2 rounded-xl border border-indigo-400 shadow flex items-center gap-1 shrink-0" title="Lihat Papan Skor Lengkap">
                         <i class="fas fa-ranking-star"></i> <span>Skor</span>
                     </button>
@@ -248,6 +267,14 @@
 
                     <button onclick="openModal('modal-confirm-reset')" class="btn-touch bg-rose-900/80 hover:bg-rose-700 text-rose-200 font-bold text-xs px-2.5 py-2 rounded-xl border border-rose-500/50 shadow shrink-0" title="Reset Seluruh Permainan">
                         <i class="fas fa-trash-can"></i>
+                    </button>
+
+                    <button onclick="toggleBgm()" id="btn-bgm-game" class="btn-touch bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs px-2.5 py-2 rounded-xl border border-emerald-400 shadow flex items-center gap-1 shrink-0" title="Musik Latar Semangat ON/OFF">
+                        <i class="fas fa-music"></i> <span class="hidden xl:inline">Musik</span>
+                    </button>
+
+                    <button onclick="toggleSound()" id="btn-sound-game" class="btn-touch bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs px-2.5 py-2 rounded-xl border border-slate-600 shadow shrink-0" title="Efek Suara ON/OFF">
+                        <i class="fas fa-volume-up"></i>
                     </button>
 
                     <button onclick="toggleFullScreen()" class="btn-touch bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-2.5 py-2 rounded-xl border border-slate-600 shadow shrink-0" title="Layar Penuh">
@@ -329,7 +356,12 @@
             </h1>
 
             <!-- Banner Pengumuman Pemenang -->
-            <div id="final-winner-banner" class="w-full max-w-4xl bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 border-2 border-amber-400 rounded-3xl p-4 text-center mb-5 shadow-2xl">
+            <div id="final-winner-banner" class="w-full max-w-4xl bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 border-2 border-amber-400 rounded-3xl p-4 text-center mb-4 shadow-2xl">
+                <!-- Diisi via JS -->
+            </div>
+
+            <!-- Podium Visual Juara 1, 2, 3 & Penghargaan Spesial -->
+            <div id="final-podium-and-awards" class="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 mb-5">
                 <!-- Diisi via JS -->
             </div>
 
@@ -725,10 +757,13 @@
         /***********************************************************************
          * IDENTITAS WARNA KE-5 KELOMPOK (KONTRAS TINGGI UNTUK PID)
          ***********************************************************************/
+        const MASCOT_OPTIONS = ["🦁", "🐯", "🦅", "🐉", "🦈", "🚀", "⚡", "🦊", "🐼", "🤖"];
+
         const TEAM_THEMES = [
             {
                 id: 0,
                 defaultName: "KELOMPOK 1",
+                defaultAvatar: "🦁",
                 colorName: "Merah",
                 bgPanel: "from-rose-950/95 to-slate-900/95",
                 borderPanel: "border-rose-500",
@@ -740,6 +775,7 @@
             {
                 id: 1,
                 defaultName: "KELOMPOK 2",
+                defaultAvatar: "🦅",
                 colorName: "Biru",
                 bgPanel: "from-sky-950/95 to-slate-900/95",
                 borderPanel: "border-sky-500",
@@ -751,6 +787,7 @@
             {
                 id: 2,
                 defaultName: "KELOMPOK 3",
+                defaultAvatar: "🐉",
                 colorName: "Hijau",
                 bgPanel: "from-emerald-950/95 to-slate-900/95",
                 borderPanel: "border-emerald-500",
@@ -762,6 +799,7 @@
             {
                 id: 3,
                 defaultName: "KELOMPOK 4",
+                defaultAvatar: "🐯",
                 colorName: "Kuning",
                 bgPanel: "from-amber-950/95 to-slate-900/95",
                 borderPanel: "border-amber-400",
@@ -773,6 +811,7 @@
             {
                 id: 4,
                 defaultName: "KELOMPOK 5",
+                defaultAvatar: "🦈",
                 colorName: "Ungu",
                 bgPanel: "from-purple-950/95 to-slate-900/95",
                 borderPanel: "border-purple-500",
@@ -787,7 +826,26 @@
          * WEB AUDIO SYNTHESIZER (TANPA FILE EKSTERNAL — OFFLINE READY)
          ***********************************************************************/
         let soundEnabled = true;
+        let bgmEnabled = true;
+        let bgmPlaying = false;
+        let bgmIntervalId = null;
+        let bgmStepIndex = 0;
         let audioCtx = null;
+
+        // Pola Melodi & Bassline Musik Latar Game Show Semangat (16 Ketukan Loop Ceria)
+        const BGM_MELODY_NOTES = [
+            523.25, 659.25, 783.99, 659.25, // C5, E5, G5, E5
+            880.00, 783.99, 659.25, 523.25, // A5, G5, E5, C5
+            587.33, 698.46, 880.00, 698.46, // D5, F5, A5, F5
+            783.99, 659.25, 587.33, 783.99  // G5, E5, D5, G5
+        ];
+
+        const BGM_BASS_NOTES = [
+            130.81, 196.00, 130.81, 196.00, // C3, G3
+            174.61, 220.00, 174.61, 220.00, // F3, A3
+            146.83, 220.00, 146.83, 220.00, // D3, A3
+            196.00, 246.94, 196.00, 246.94  // G3, B3
+        ];
 
         function getAudioCtx() {
             if (!audioCtx) {
@@ -798,6 +856,133 @@
                 audioCtx.resume();
             }
             return audioCtx;
+        }
+
+        function playBgmStep() {
+            if (!bgmEnabled) return;
+            try {
+                const ctx = getAudioCtx();
+                if (!ctx || ctx.state !== 'running') return;
+                const now = ctx.currentTime;
+                const step = bgmStepIndex % BGM_MELODY_NOTES.length;
+
+                // Cek apakah sedang di babak menjawab dengan waktu kritis (<= 5 detik) untuk efek tempo cepat
+                const isUrgent = gameState &&
+                    gameState.screen === 'GAME' &&
+                    gameState.timerDuration > 0 &&
+                    gameState.timeLeft <= 5 &&
+                    gameState.timeLeft > 0;
+
+                // 1. Suara Melodi Ceria (Triangle Wave)
+                const melOsc = ctx.createOscillator();
+                const melGain = ctx.createGain();
+                melOsc.type = 'triangle';
+                const freq = isUrgent ? BGM_MELODY_NOTES[step] * 1.12246 : BGM_MELODY_NOTES[step]; // Naik nada sedikit saat tegang
+                melOsc.frequency.setValueAtTime(freq, now);
+                melGain.gain.setValueAtTime(0.055, now);
+                melGain.gain.exponentialRampToValueAtTime(0.001, now + 0.17);
+                melOsc.connect(melGain);
+                melGain.connect(ctx.destination);
+                melOsc.start(now);
+                melOsc.stop(now + 0.18);
+
+                // 2. Suara Bassline Bouncy (Sine Wave)
+                const bassOsc = ctx.createOscillator();
+                const bassGain = ctx.createGain();
+                bassOsc.type = 'sine';
+                bassOsc.frequency.setValueAtTime(BGM_BASS_NOTES[step], now);
+                bassGain.gain.setValueAtTime(0.075, now);
+                bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+                bassOsc.connect(bassGain);
+                bassGain.connect(ctx.destination);
+                bassOsc.start(now);
+                bassOsc.stop(now + 0.2);
+
+                // 3. Ketukan Ritme Halus setiap ketukan genap
+                if (step % 2 === 0) {
+                    const kickOsc = ctx.createOscillator();
+                    const kickGain = ctx.createGain();
+                    kickOsc.type = 'sine';
+                    kickOsc.frequency.setValueAtTime(120, now);
+                    kickOsc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+                    kickGain.gain.setValueAtTime(0.06, now);
+                    kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+                    kickOsc.connect(kickGain);
+                    kickGain.connect(ctx.destination);
+                    kickOsc.start(now);
+                    kickOsc.stop(now + 0.095);
+                }
+
+                bgmStepIndex++;
+            } catch (e) {
+                // Abaikan jika konteks audio belum diizinkan browser
+            }
+        }
+
+        function startBgm() {
+            if (!bgmEnabled) return;
+            getAudioCtx();
+            if (bgmPlaying) return;
+            bgmPlaying = true;
+            if (bgmIntervalId) clearInterval(bgmIntervalId);
+            bgmIntervalId = setInterval(playBgmStep, 210); // Tempo ~142 BPM Semangat
+            updateAudioButtonsUI();
+        }
+
+        function stopBgm() {
+            bgmPlaying = false;
+            if (bgmIntervalId) {
+                clearInterval(bgmIntervalId);
+                bgmIntervalId = null;
+            }
+            updateAudioButtonsUI();
+        }
+
+        function toggleBgm() {
+            bgmEnabled = !bgmEnabled;
+            if (bgmEnabled) {
+                startBgm();
+                playTone('select');
+            } else {
+                stopBgm();
+            }
+            updateAudioButtonsUI();
+        }
+
+        function updateAudioButtonsUI() {
+            const btnHomeBgm = document.getElementById('btn-bgm-home');
+            if (btnHomeBgm) {
+                btnHomeBgm.className = bgmEnabled
+                    ? 'btn-touch bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400 px-4 py-2.5 rounded-2xl font-bold flex items-center gap-2 text-base shadow-lg'
+                    : 'btn-touch bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-600 px-4 py-2.5 rounded-2xl font-bold flex items-center gap-2 text-base shadow-lg';
+                btnHomeBgm.innerHTML = bgmEnabled
+                    ? '<i class="fas fa-music text-lg animate-bounce"></i> <span>Musik: ON</span>'
+                    : '<i class="fas fa-volume-xmark text-lg"></i> <span>Musik: OFF</span>';
+            }
+
+            const btnGameBgm = document.getElementById('btn-bgm-game');
+            if (btnGameBgm) {
+                btnGameBgm.className = bgmEnabled
+                    ? 'btn-touch bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs px-2.5 py-2 rounded-xl border border-emerald-400 shadow flex items-center gap-1 shrink-0'
+                    : 'btn-touch bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold text-xs px-2.5 py-2 rounded-xl border border-slate-600 shadow flex items-center gap-1 shrink-0';
+                btnGameBgm.innerHTML = bgmEnabled
+                    ? '<i class="fas fa-music animate-pulse"></i> <span class="hidden xl:inline">Musik: ON</span>'
+                    : '<i class="fas fa-volume-xmark"></i> <span class="hidden xl:inline">Musik: OFF</span>';
+            }
+
+            const btnHomeSound = document.getElementById('btn-sound-home');
+            if (btnHomeSound) {
+                btnHomeSound.innerHTML = soundEnabled
+                    ? '<i class="fas fa-volume-up text-lg text-amber-400"></i> <span>Efek Suara: ON</span>'
+                    : '<i class="fas fa-volume-mute text-lg text-slate-400"></i> <span class="text-slate-400">Efek Suara: OFF</span>';
+            }
+
+            const btnGameSound = document.getElementById('btn-sound-game');
+            if (btnGameSound) {
+                btnGameSound.innerHTML = soundEnabled
+                    ? '<i class="fas fa-volume-up text-amber-400"></i>'
+                    : '<i class="fas fa-volume-mute text-slate-500"></i>';
+            }
         }
 
         function playTone(type) {
@@ -884,13 +1069,113 @@
 
         function toggleSound() {
             soundEnabled = !soundEnabled;
-            const btn = document.getElementById('btn-sound-home');
-            if (btn) {
-                btn.innerHTML = soundEnabled
-                    ? '<i class="fas fa-volume-up text-lg"></i> <span>Suara: ON</span>'
-                    : '<i class="fas fa-volume-mute text-lg text-slate-400"></i> <span class="text-slate-400">Suara: OFF</span>';
-            }
+            if (soundEnabled) playTone('select');
+            updateAudioButtonsUI();
         }
+
+        function playTeacherReaction(type) {
+            try {
+                const ctx = getAudioCtx();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+
+                if (type === 'applause') {
+                    // Simulasi Tepuk Tangan Meriah + Sorak
+                    for (let i = 0; i < 22; i++) {
+                        const start = now + (i * 0.045) + (Math.random() * 0.02);
+                        const bufferSize = ctx.sampleRate * 0.06;
+                        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                        const output = noiseBuffer.getChannelData(0);
+                        for (let j = 0; j < bufferSize; j++) {
+                            output[j] = (Math.random() * 2 - 1) * Math.exp(-j / (bufferSize * 0.35));
+                        }
+                        const whiteNoise = ctx.createBufferSource();
+                        whiteNoise.buffer = noiseBuffer;
+
+                        const filter = ctx.createBiquadFilter();
+                        filter.type = 'bandpass';
+                        filter.frequency.setValueAtTime(1100 + Math.random() * 600, start);
+
+                        const gain = ctx.createGain();
+                        gain.gain.setValueAtTime(0.18, start);
+                        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.055);
+
+                        whiteNoise.connect(filter);
+                        filter.connect(gain);
+                        gain.connect(ctx.destination);
+                        whiteNoise.start(start);
+                    }
+                } else if (type === 'drumroll') {
+                    // Simulasi Drumroll Ketegangan + Simbal Akhir
+                    const hits = 18;
+                    for (let i = 0; i < hits; i++) {
+                        const t = now + i * 0.055;
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(140 + (i % 2) * 15, t);
+                        osc.frequency.exponentialRampToValueAtTime(55, t + 0.045);
+                        gain.gain.setValueAtTime(0.15 + (i / hits) * 0.12, t);
+                        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(t);
+                        osc.stop(t + 0.05);
+                    }
+                    //Nada puncak setelah drumroll
+                    const endT = now + hits * 0.055 + 0.04;
+                    const endOsc = ctx.createOscillator();
+                    const endGain = ctx.createGain();
+                    endOsc.type = 'sawtooth';
+                    endOsc.frequency.setValueAtTime(523.25, endT);
+                    endOsc.frequency.exponentialRampToValueAtTime(659.25, endT + 0.35);
+                    endGain.gain.setValueAtTime(0.22, endT);
+                    endGain.gain.exponentialRampToValueAtTime(0.001, endT + 0.38);
+                    endOsc.connect(endGain);
+                    endGain.connect(ctx.destination);
+                    endOsc.start(endT);
+                    endOsc.stop(endT + 0.4);
+                } else if (type === 'cheer') {
+                    // Fanfare Hore Semangat
+                    const chord = [523.25, 659.25, 783.99, 1046.5];
+                    chord.forEach((f, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(f, now + idx * 0.06);
+                        gain.gain.setValueAtTime(0.2, now + idx * 0.06);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.4);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + idx * 0.06);
+                        osc.stop(now + idx * 0.06 + 0.42);
+                    });
+                }
+            } catch (e) {}
+        }
+
+        function speakCurrentQuestion() {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const qData = QUESTIONS_BANK[gameState.currentQuestionIndex];
+            if (!qData) return;
+
+            const textToRead = `Soal nomor ${gameState.currentQuestionIndex + 1}. ${qData.question}. Pilihan A: ${qData.options.A}. Pilihan B: ${qData.options.B}. Pilihan C: ${qData.options.C}. Pilihan D: ${qData.options.D}.`;
+            const utter = new SpeechSynthesisUtterance(textToRead);
+            utter.lang = 'id-ID';
+            utter.rate = 0.98;
+            utter.pitch = 1.05;
+            window.speechSynthesis.speak(utter);
+        }
+
+        // Aktifkan musik latar otomatis pada sentuhan pertama siswa/guru di layar PID
+        window.addEventListener('pointerdown', function initAudioOnFirstTouch() {
+            if (bgmEnabled && !bgmPlaying) {
+                startBgm();
+            } else {
+                getAudioCtx();
+            }
+        }, { once: true });
 
         /***********************************************************************
          * STATE PERMAINAN & PENYIMPANAN LOCALSTORAGE
@@ -908,7 +1193,10 @@
                 teams: TEAM_THEMES.map(t => ({
                     id: t.id,
                     name: t.defaultName,
+                    avatar: t.defaultAvatar,
                     score: 0,
+                    streak: 0,
+                    maxStreak: 0,
                     correctCount: 0,
                     wrongCount: 0,
                     unansweredCount: 0,
@@ -946,10 +1234,13 @@
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     if (parsed && Array.isArray(parsed.teams) && parsed.teams.length === 5 && Array.isArray(parsed.questionStates)) {
-                        // Pastikan properti kecepatan ada pada data lama
-                        parsed.teams.forEach(t => {
+                        // Pastikan properti kecepatan, avatar, dan streak ada pada data lama
+                        parsed.teams.forEach((t, idx) => {
                             if (typeof t.totalCorrectTimeMs !== 'number') t.totalCorrectTimeMs = 0;
                             if (typeof t.totalAnswerTimeMs !== 'number') t.totalAnswerTimeMs = 0;
+                            if (typeof t.streak !== 'number') t.streak = 0;
+                            if (typeof t.maxStreak !== 'number') t.maxStreak = 0;
+                            if (!t.avatar) t.avatar = TEAM_THEMES[idx].defaultAvatar;
                         });
                         parsed.questionStates.forEach(qs => {
                             if (!Array.isArray(qs.currentTimesMs)) qs.currentTimesMs = [null, null, null, null, null];
@@ -987,6 +1278,7 @@
         function initApp() {
             renderHomeTeamBadges();
             renderSettingsInputs();
+            updateAudioButtonsUI();
 
             if (gameState.screen === 'GAME') {
                 showScreen('GAME');
@@ -1015,6 +1307,7 @@
         }
 
         function startGame() {
+            startBgm();
             playTone('select');
             // Jika semua soal sudah terkunci, tanyakan apakah ingin main ulang atau lihat hasil akhir
             const allCompleted = gameState.questionStates.every(qs => qs.locked);
@@ -1246,6 +1539,9 @@
                 // ===============================================================
                 // KONDISI A — ADA MINIMAL SATU KELOMPOK YANG BENAR
                 // ===============================================================
+                let fastestCorrectTeamIdx = -1;
+                let fastestCorrectTime = Infinity;
+
                 choicesSnapshot.forEach((choice, teamIdx) => {
                     const team = gameState.teams[teamIdx];
                     const timeTaken = timesSnapshot[teamIdx] || 0;
@@ -1253,14 +1549,25 @@
                         outcomes.push('CORRECT');
                         team.score += 100;
                         team.correctCount += 1;
+                        team.streak = (team.streak || 0) + 1;
+                        if (team.streak > (team.maxStreak || 0)) {
+                            team.maxStreak = team.streak;
+                        }
                         team.totalCorrectTimeMs = (team.totalCorrectTimeMs || 0) + timeTaken;
                         team.totalAnswerTimeMs = (team.totalAnswerTimeMs || 0) + timeTaken;
+
+                        if (timeTaken > 0 && timeTaken < fastestCorrectTime) {
+                            fastestCorrectTime = timeTaken;
+                            fastestCorrectTeamIdx = teamIdx;
+                        }
                     } else if (choice === null) {
                         outcomes.push('UNANSWERED');
                         team.unansweredCount += 1;
+                        team.streak = 0;
                     } else {
                         outcomes.push('WRONG');
                         team.wrongCount += 1;
+                        team.streak = 0;
                         team.totalAnswerTimeMs = (team.totalAnswerTimeMs || 0) + timeTaken;
                     }
                 });
@@ -1273,7 +1580,8 @@
                     choices: choicesSnapshot,
                     timesMs: timesSnapshot,
                     outcomes: outcomes,
-                    anyCorrect: true
+                    anyCorrect: true,
+                    fastestCorrectTeamIdx: fastestCorrectTeamIdx
                 };
 
                 playTone('success');
@@ -1290,6 +1598,7 @@
                     } else {
                         outcomes.push('WRONG');
                         team.wrongCount += 1;
+                        team.streak = 0;
                         team.totalAnswerTimeMs = (team.totalAnswerTimeMs || 0) + timeTaken;
                     }
                 });
@@ -1471,15 +1780,22 @@
             const miniScoreboard = document.getElementById('top-mini-scoreboard');
             miniScoreboard.innerHTML = gameState.teams.map((team, idx) => {
                 const theme = TEAM_THEMES[idx];
+                const streakBadge = (team.streak >= 2)
+                    ? `<span class="bg-orange-500/20 border border-orange-400 text-orange-300 text-[10px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shrink-0 animate-pulse" title="Menjawab Benar ${team.streak}x Beruntun!">🔥${team.streak}x</span>`
+                    : '';
                 return `
                     <div class="flex items-center justify-between gap-1.5 bg-slate-950/90 border-2 ${theme.borderPanel} px-2.5 py-1 rounded-xl min-w-0 shadow">
                         <div class="flex items-center gap-1.5 min-w-0">
-                            <span class="${theme.headerBg} font-game text-[11px] px-1.5 py-0.5 rounded-md shrink-0 leading-none">K${idx + 1}</span>
+                            <span class="text-base leading-none shrink-0">${team.avatar || theme.defaultAvatar}</span>
+                            <span class="${theme.headerBg} font-game text-[10px] px-1.5 py-0.5 rounded-md shrink-0 leading-none">K${idx + 1}</span>
                             <span class="text-xs md:text-sm font-extrabold text-white truncate">${escapeHtml(team.name)}</span>
                         </div>
-                        <div class="flex items-baseline gap-1 bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-800 shrink-0">
-                            <span class="font-game text-sm md:text-base ${theme.badgeText} leading-none">${team.score}</span>
-                            <span class="text-[10px] font-bold text-slate-400 hidden sm:inline leading-none">POIN</span>
+                        <div class="flex items-center gap-1 shrink-0">
+                            ${streakBadge}
+                            <div class="flex items-baseline gap-1 bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-800 shrink-0">
+                                <span class="font-game text-sm md:text-base ${theme.badgeText} leading-none">${team.score}</span>
+                                <span class="text-[10px] font-bold text-slate-400 hidden sm:inline leading-none">POIN</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1626,11 +1942,23 @@
             const hasEval = Boolean(qState.lastEvaluation);
             const isCompactMode = hasEval || Boolean(qState.showExplanation);
 
+            // Hitung urutan kecepatan menjawab pada babak aktif (#1, #2, dst.)
+            const activeTimes = Array.isArray(qState.currentTimesMs) ? qState.currentTimesMs : [null, null, null, null, null];
+            const answeredOrderList = activeTimes
+                .map((t, idx) => ({ idx, time: t }))
+                .filter(item => item.time !== null && item.time > 0)
+                .sort((a, b) => a.time - b.time);
+            const orderRankMap = {};
+            answeredOrderList.forEach((item, rankIdx) => {
+                orderRankMap[item.idx] = rankIdx + 1;
+            });
+
             container.innerHTML = gameState.teams.map((team, teamIdx) => {
                 const theme = TEAM_THEMES[teamIdx];
                 const currentChoice = qState.currentChoices[teamIdx];
                 const currentTimeMs = Array.isArray(qState.currentTimesMs) ? qState.currentTimesMs[teamIdx] : null;
                 const hasChosen = currentChoice !== null;
+                const speedOrderNum = orderRankMap[teamIdx];
 
                 // Status & lencana untuk setiap panel kelompok
                 let statusBadgeHtml = '';
@@ -1641,11 +1969,12 @@
                     const evalChoice = qState.lastEvaluation.choices[teamIdx];
                     const evalTimeMs = Array.isArray(qState.lastEvaluation.timesMs) ? qState.lastEvaluation.timesMs[teamIdx] : null;
                     const speedTag = evalTimeMs ? ` • ${formatResponseTime(evalTimeMs)}` : '';
+                    const isFastestCorrect = qState.lastEvaluation.fastestCorrectTeamIdx === teamIdx;
 
                     if (outcome === 'CORRECT') {
                         statusBadgeHtml = `
                             <div class="w-full bg-emerald-500 text-slate-950 font-game text-[11px] md:text-xs py-1 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1">
-                                <i class="fas fa-check-circle"></i> BENAR! (+100)${speedTag}
+                                <i class="fas fa-check-circle"></i> BENAR! (+100)${speedTag} ${isFastestCorrect ? '<span class="bg-amber-300 text-slate-950 px-1.5 py-0.2 rounded text-[10px] font-black ml-0.5">⚡TERCEPAT</span>' : ''}
                             </div>
                         `;
                         panelGlowClass = 'ring-4 ring-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.45)]';
@@ -1664,9 +1993,10 @@
                     }
                 } else if (hasChosen) {
                     const speedStr = currentTimeMs ? ` (${formatResponseTime(currentTimeMs)})` : '';
+                    const orderTag = speedOrderNum ? `<span class="bg-slate-950 text-amber-300 px-1.5 py-0.2 rounded text-[10px] font-black">#${speedOrderNum}</span>` : '';
                     statusBadgeHtml = `
                         <div class="w-full bg-amber-400 text-slate-950 font-game text-[11px] md:text-xs py-1 px-2 rounded-xl text-center shadow flex items-center justify-center gap-1 animate-LockGlow">
-                            <i class="fas fa-bolt text-[10px]"></i> TERKUNCI: ${currentChoice}${speedStr}
+                            ${orderTag} <span>TERKUNCI: ${currentChoice}${speedStr}</span>
                         </div>
                     `;
                 } else {
@@ -1729,21 +2059,29 @@
                     `;
                 }).join('');
 
+                const streakPill = (team.streak >= 2)
+                    ? `<span class="bg-orange-500 text-slate-950 font-game text-[10px] px-1.5 py-0.5 rounded-md shrink-0 leading-none">🔥${team.streak}x</span>`
+                    : '';
+
                 return `
                     <div class="h-full bg-gradient-to-b ${theme.bgPanel} border-2 ${theme.borderPanel} rounded-3xl p-2 flex flex-col justify-between shadow-2xl transition-all min-w-0 ${panelGlowClass}">
-                        <!-- Header Panel Kelompok: Nama & Skor Terpisah Rapi Anti-Tumpuk -->
-                        <div class="flex items-center justify-between gap-1.5 pb-1 border-b border-white/15 shrink-0 min-w-0">
-                            <div class="flex items-center gap-1.5 min-w-0">
-                                <span class="${theme.headerBg} font-game text-[11px] px-1.5 py-0.5 rounded-md uppercase shrink-0 shadow leading-none">
+                        <!-- Header Panel Kelompok: Avatar, Nama, Streak & Skor Terpisah Rapi Anti-Tumpuk -->
+                        <div class="flex items-center justify-between gap-1 pb-1 border-b border-white/15 shrink-0 min-w-0">
+                            <div class="flex items-center gap-1 min-w-0">
+                                <span class="text-base leading-none shrink-0">${team.avatar || theme.defaultAvatar}</span>
+                                <span class="${theme.headerBg} font-game text-[10px] px-1.5 py-0.5 rounded-md uppercase shrink-0 shadow leading-none">
                                     K${teamIdx + 1}
                                 </span>
                                 <h3 class="font-game text-xs md:text-sm text-white truncate leading-tight" title="${escapeHtml(team.name)}">
                                     ${escapeHtml(team.name)}
                                 </h3>
                             </div>
-                            <div class="bg-slate-950/95 border border-white/20 px-2 py-0.5 rounded-lg flex items-baseline gap-1 shrink-0 shadow">
-                                <span class="font-game text-sm md:text-base ${theme.badgeText} leading-none">${team.score}</span>
-                                <span class="text-[9px] font-extrabold text-slate-300 leading-none">POIN</span>
+                            <div class="flex items-center gap-1 shrink-0">
+                                ${streakPill}
+                                <div class="bg-slate-950/95 border border-white/20 px-2 py-0.5 rounded-lg flex items-baseline gap-1 shrink-0 shadow">
+                                    <span class="font-game text-sm md:text-base ${theme.badgeText} leading-none">${team.score}</span>
+                                    <span class="text-[9px] font-extrabold text-slate-300 leading-none">POIN</span>
+                                </div>
                             </div>
                         </div>
 
@@ -1770,11 +2108,12 @@
             container.innerHTML = gameState.teams.map((team, idx) => {
                 const theme = TEAM_THEMES[idx];
                 return `
-                    <div class="bg-slate-900/90 border-2 ${theme.borderPanel} rounded-2xl p-3 text-center shadow-xl">
-                        <div class="${theme.headerBg} text-xs font-game py-1 px-2 rounded-lg mb-1.5 inline-block">
+                    <div class="bg-slate-900/90 border-2 ${theme.borderPanel} rounded-2xl p-3 text-center shadow-xl flex flex-col items-center">
+                        <div class="text-3xl mb-1">${team.avatar || theme.defaultAvatar}</div>
+                        <div class="${theme.headerBg} text-[11px] font-game py-0.5 px-2.5 rounded-lg mb-1.5 inline-block">
                             WARNA ${theme.colorName.toUpperCase()}
                         </div>
-                        <div class="font-game text-lg text-white truncate">${escapeHtml(team.name)}</div>
+                        <div class="font-game text-lg text-white truncate w-full">${escapeHtml(team.name)}</div>
                         <div class="text-xs font-bold text-slate-400 mt-0.5">Skor: ${team.score} Poin</div>
                     </div>
                 `;
@@ -1786,18 +2125,30 @@
             if (!container) return;
             container.innerHTML = gameState.teams.map((team, idx) => {
                 const theme = TEAM_THEMES[idx];
+                const currentAvatar = team.avatar || theme.defaultAvatar;
+                const optionsHtml = MASCOT_OPTIONS.map(emoji =>
+                    `<option value="${emoji}" ${emoji === currentAvatar ? 'selected' : ''}>${emoji}</option>`
+                ).join('');
+
                 return `
-                    <div class="flex items-center gap-2.5">
-                        <span class="${theme.headerBg} font-game text-xs w-28 py-2.5 rounded-xl text-center shrink-0">
-                            KELOMPOK ${idx + 1}
+                    <div class="flex items-center gap-2">
+                        <span class="${theme.headerBg} font-game text-xs w-24 py-2.5 rounded-xl text-center shrink-0">
+                            KEL. ${idx + 1}
                         </span>
+                        <select
+                            id="input-team-avatar-${idx}"
+                            class="bg-slate-800 border-2 border-slate-600 focus:border-amber-400 rounded-xl px-2 py-2 text-lg outline-none cursor-pointer shrink-0"
+                            title="Pilih Maskot Kelompok"
+                        >
+                            ${optionsHtml}
+                        </select>
                         <input
                             type="text"
                             id="input-team-name-${idx}"
                             value="${escapeHtml(team.name)}"
                             maxlength="22"
                             placeholder="Nama Kelompok ${idx + 1}"
-                            class="w-full bg-slate-800 border-2 border-slate-600 focus:border-amber-400 rounded-xl px-3.5 py-2 text-white font-bold text-sm outline-none"
+                            class="w-full bg-slate-800 border-2 border-slate-600 focus:border-amber-400 rounded-xl px-3 py-2 text-white font-bold text-sm outline-none"
                         />
                     </div>
                 `;
@@ -1829,6 +2180,8 @@
             TEAM_THEMES.forEach((t, idx) => {
                 const inp = document.getElementById(`input-team-name-${idx}`);
                 if (inp) inp.value = t.defaultName;
+                const sel = document.getElementById(`input-team-avatar-${idx}`);
+                if (sel) sel.value = t.defaultAvatar;
             });
         }
 
@@ -1840,6 +2193,10 @@
                     team.name = inp.value.trim();
                 } else {
                     team.name = TEAM_THEMES[idx].defaultName;
+                }
+                const sel = document.getElementById(`input-team-avatar-${idx}`);
+                if (sel && sel.value) {
+                    team.avatar = sel.value;
                 }
             });
             gameState.timerDuration = tempTimerSelection;
@@ -1959,7 +2316,7 @@
 
                 winnerBanner.innerHTML = `
                     <div class="text-amber-300 font-extrabold text-sm uppercase tracking-widest mb-1">🎉 SELAMAT KEPADA KELOMPOK JUARA 1 🎉</div>
-                    <div class="font-game text-4xl md:text-5xl text-white drop-shadow my-1">👑 ${escapeHtml(winner.name)}</div>
+                    <div class="font-game text-4xl md:text-5xl text-white drop-shadow my-1">👑 ${winner.avatar || ''} ${escapeHtml(winner.name)}</div>
                     <div class="text-amber-200 font-bold text-lg flex flex-wrap items-center justify-center gap-2 mt-1">
                         <span>Total Skor: <strong class="font-game text-2xl text-amber-300">${highestScore} POIN</strong></span>
                         ${speedBadge}
@@ -1967,11 +2324,99 @@
                     ${tieBreakerNote}
                 `;
             } else {
-                const winnerNames = winners.map(w => escapeHtml(w.name)).join(' & ');
+                const winnerNames = winners.map(w => `${w.avatar || ''} ${escapeHtml(w.name)}`).join(' & ');
                 winnerBanner.innerHTML = `
                     <div class="text-amber-300 font-extrabold text-sm uppercase tracking-widest mb-1">🎉 SELAMAT KEPADA PEMENANG BERSAMA 🎉</div>
                     <div class="font-game text-3xl md:text-4xl text-white drop-shadow my-1">👑 ${winnerNames}</div>
                     <div class="text-amber-200 font-bold text-lg">Berbagi Peringkat Pertama dengan Skor & Kecepatan Sama: <span class="font-game text-2xl text-amber-300">${highestScore} POIN</span></div>
+                `;
+            }
+
+            // 1B. Render Podium Visual Juara 1, 2, 3 & Gelar Penghargaan Khusus
+            const podiumContainer = document.getElementById('final-podium-and-awards');
+            if (podiumContainer) {
+                const first = ranked[0];
+                const second = ranked[1];
+                const third = ranked[2];
+
+                // Cari pemenang penghargaan spesial untuk memotivasi semua kelompok
+                const fastestTeam = [...ranked].filter(t => isFinite(t.avgSpeedMs)).sort((a, b) => a.avgSpeedMs - b.avgSpeedMs)[0];
+                const streakTeam = [...ranked].sort((a, b) => (b.maxStreak || 0) - (a.maxStreak || 0))[0];
+                const accurateTeam = [...ranked].sort((a, b) => {
+                    const accA = (a.correctCount + a.wrongCount) > 0 ? a.correctCount / (a.correctCount + a.wrongCount) : 0;
+                    const accB = (b.correctCount + b.wrongCount) > 0 ? b.correctCount / (b.correctCount + b.wrongCount) : 0;
+                    return accB - accA || b.correctCount - a.correctCount;
+                })[0];
+
+                podiumContainer.innerHTML = `
+                    <!-- Podium Juara 1, 2, 3 -->
+                    <div class="lg:col-span-7 bg-slate-900/90 border-2 border-slate-700 rounded-3xl p-4 flex items-end justify-center gap-3 md:gap-5 min-h-[190px] shadow-xl">
+                        <!-- Juara 2 -->
+                        <div class="flex-1 max-w-[160px] flex flex-col items-center">
+                            <div class="text-2xl mb-0.5">${second.avatar || '🦅'}</div>
+                            <div class="font-game text-xs md:text-sm text-slate-200 truncate w-full text-center">${escapeHtml(second.name)}</div>
+                            <div class="text-xs font-extrabold text-slate-400 mb-1.5">${second.score} Poin</div>
+                            <div class="w-full h-20 bg-gradient-to-b from-slate-300 to-slate-500 text-slate-950 rounded-t-2xl flex flex-col items-center justify-center font-game shadow-lg border-t-2 border-white">
+                                <span class="text-xl leading-none">🥈 #2</span>
+                            </div>
+                        </div>
+                        <!-- Juara 1 -->
+                        <div class="flex-1 max-w-[180px] flex flex-col items-center">
+                            <div class="text-3xl mb-0.5 animate-bounce">${first.avatar || '🦁'}</div>
+                            <div class="font-game text-sm md:text-base text-amber-300 truncate w-full text-center">${escapeHtml(first.name)}</div>
+                            <div class="text-xs font-extrabold text-amber-200 mb-1.5">${first.score} Poin</div>
+                            <div class="w-full h-28 bg-gradient-to-b from-amber-300 via-yellow-400 to-amber-600 text-slate-950 rounded-t-2xl flex flex-col items-center justify-center font-game shadow-xl border-t-2 border-yellow-100">
+                                <span class="text-2xl leading-none">🏆 #1</span>
+                                <span class="text-[10px] font-black uppercase mt-1">JUARA UTAMA</span>
+                            </div>
+                        </div>
+                        <!-- Juara 3 -->
+                        <div class="flex-1 max-w-[160px] flex flex-col items-center">
+                            <div class="text-2xl mb-0.5">${third.avatar || '🐉'}</div>
+                            <div class="font-game text-xs md:text-sm text-amber-200/90 truncate w-full text-center">${escapeHtml(third.name)}</div>
+                            <div class="text-xs font-extrabold text-slate-400 mb-1.5">${third.score} Poin</div>
+                            <div class="w-full h-16 bg-gradient-to-b from-amber-600 to-amber-800 text-white rounded-t-2xl flex flex-col items-center justify-center font-game shadow-lg border-t-2 border-amber-400">
+                                <span class="text-lg leading-none">🥉 #3</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gelar Penghargaan Khusus Kelas -->
+                    <div class="lg:col-span-5 bg-slate-900/90 border-2 border-slate-700 rounded-3xl p-4 flex flex-col justify-between gap-2 shadow-xl">
+                        <div class="text-xs font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                            <i class="fas fa-medal"></i> PENGHARGAAN SPESIAL KELAS 6
+                        </div>
+                        <div class="bg-slate-800/90 border border-amber-400/40 rounded-2xl px-3.5 py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-2xl">⚡</span>
+                                <div>
+                                    <div class="text-[11px] font-extrabold text-amber-300 uppercase">Si Kilat Tercepat</div>
+                                    <div class="font-game text-sm text-white">${fastestTeam ? `${fastestTeam.avatar || ''} ${escapeHtml(fastestTeam.name)}` : 'Belum Ada'}</div>
+                                </div>
+                            </div>
+                            <span class="font-game text-xs text-amber-200 bg-amber-500/20 px-2.5 py-1 rounded-lg">${fastestTeam ? formatResponseTime(fastestTeam.avgSpeedMs) : '-'}</span>
+                        </div>
+                        <div class="bg-slate-800/90 border border-orange-400/40 rounded-2xl px-3.5 py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-2xl">🔥</span>
+                                <div>
+                                    <div class="text-[11px] font-extrabold text-orange-300 uppercase">Raja Beruntun (Streak)</div>
+                                    <div class="font-game text-sm text-white">${streakTeam && streakTeam.maxStreak > 0 ? `${streakTeam.avatar || ''} ${escapeHtml(streakTeam.name)}` : 'Belum Ada'}</div>
+                                </div>
+                            </div>
+                            <span class="font-game text-xs text-orange-200 bg-orange-500/20 px-2.5 py-1 rounded-lg">${streakTeam && streakTeam.maxStreak > 0 ? `${streakTeam.maxStreak}x Benar` : '-'}</span>
+                        </div>
+                        <div class="bg-slate-800/90 border border-sky-400/40 rounded-2xl px-3.5 py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-2xl">🎯</span>
+                                <div>
+                                    <div class="text-[11px] font-extrabold text-sky-300 uppercase">Akurasi Terbaik</div>
+                                    <div class="font-game text-sm text-white">${accurateTeam && accurateTeam.correctCount > 0 ? `${accurateTeam.avatar || ''} ${escapeHtml(accurateTeam.name)}` : 'Belum Ada'}</div>
+                                </div>
+                            </div>
+                            <span class="font-game text-xs text-sky-200 bg-sky-500/20 px-2.5 py-1 rounded-lg">${accurateTeam && (accurateTeam.correctCount + accurateTeam.wrongCount) > 0 ? Math.round((accurateTeam.correctCount / (accurateTeam.correctCount + accurateTeam.wrongCount)) * 100) + '%' : '-'}</span>
+                        </div>
+                    </div>
                 `;
             }
 
@@ -1993,7 +2438,8 @@
                         </td>
                         <td class="py-4 px-4">
                             <div class="flex items-center gap-2.5">
-                                <span class="${theme.headerBg} w-4 h-4 rounded-full shrink-0"></span>
+                                <span class="text-2xl shrink-0">${team.avatar || theme.defaultAvatar}</span>
+                                <span class="${theme.headerBg} w-3.5 h-3.5 rounded-full shrink-0"></span>
                                 <span class="font-game text-xl text-white">${escapeHtml(team.name)}</span>
                                 ${isWinner ? '<span class="bg-amber-400 text-slate-950 font-game text-xs px-2.5 py-0.5 rounded-full">JUARA 1</span>' : ''}
                                 ${isWinner && wonBySpeedTieBreaker ? '<span class="bg-emerald-400 text-slate-950 font-game text-[11px] px-2 py-0.5 rounded-full"><i class="fas fa-bolt"></i> TERCEPAT</span>' : ''}
@@ -2117,6 +2563,7 @@
         function playAgainSameTeams() {
             playTone('select');
             const savedNames = gameState.teams.map(t => t.name);
+            const savedAvatars = gameState.teams.map(t => t.avatar);
             const savedTimer = gameState.timerDuration;
 
             gameState = createInitialState();
@@ -2124,6 +2571,7 @@
             gameState.timeLeft = savedTimer;
             gameState.teams.forEach((t, idx) => {
                 t.name = savedNames[idx];
+                t.avatar = savedAvatars[idx];
             });
 
             saveStateToStorage();
